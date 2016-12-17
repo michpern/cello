@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - My Flask Application</title>
+    <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
+    <style>
+        label, input {
+            display: block;
+        }
+
+            input.text {
+                margin-bottom: 12px;
+                width: 95%;
+                padding: .4em;
+            }
+    </style>
+
+    <script>
+    $(function () {
+        var dialog, form
+        function addUser() {
+            var ps = $("#parentStream")
+            streamId = ps.val()
+            $.ajax({
+                url: "/add_item",                   //
+                timeout: 30000,
+                type: "POST",
+                data: form.serialize(),
+                dataType: 'html',
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("An error has occurred making the request: " + errorThrown)
+                },
+                success: function (data) {
+                    dialog.dialog("close")
+                    sid = "#stream-" + streamId
+                    stream_li = $(sid)
+                    stream_li.replaceWith(data)
+                    return true
+                }
+            });
+        }
+
+    dialog = $("#dialog-form").dialog({
+        autoOpen: false,
+        height: 400,
+        width: 350,
+        modal: true,
+        buttons: {
+            "Create item": addUser,
+            Cancel: function () {
+                dialog.dialog("close");
+            }
+        },
+        close: function () {
+            form[0].reset();
+/*            allFields.removeClass("ui-state-error");  */
+        }
+    });
+
+        form = dialog.find("form").on("submit", function (event) {
+            event.preventDefault();
+            addUser();
+        });
+
+        $("#create-item").button().on("click", function () {
+            dialog.dialog("open");
+        });
+    });
+
+    var binder = function () {
+
+        //for drag and drop of the workspaces
+        $(function () {
+            $(".ul-parent").sortable({
+                handle: '.handle',
+                //																		items: '> :not(.create_workspace)',
+                placeholder: "highlight",
+                start: function (event, ui) {
+                    ui.placeholder.height(ui.helper.outerHeight());
+                    ui.placeholder.width(ui.helper.outerWidth());
+                    console.log(ui, "ui")
+                }
+            }).disableSelection();
+        });
+
+        //for shuffling of the cards
+        $(function () {
+            $("li #items").sortable({
+                connectWith: "li #items",
+/*                placeholder: "highlight", */
+                cancel: ".cancel_drag",
+                items: '> :not(.cancel_drag)',
+                start: function (event, ui) {
+                    ui.placeholder.height(ui.helper.outerHeight());
+                    ui.placeholder.width(ui.helper.outerWidth());
+                    ui.item.startPos = ui.item.index();
+                    ui.item.savedId = ui.item[0].id;
+                },
+                stop: function (event, ui) {
+                    console.log("Start position: " + ui.item.startPos);
+                    console.log("New position: " + ui.item.index());
+                    console.log("ID:" + ui.item.savedId);
+                }
+            }).disableSelection();
+        });
+
+
+    }
+
+    binder()
+    </script>
+</head>
+
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="/" class="navbar-brand">Application name</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container body-content">
+        {% block content %}{% endblock %}
+        <hr />
+        <footer>
+            <p>&copy; {{ year }} - My Flask Application</p>
+        </footer>
+    </div>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+.modal-body { overflow-y: visible; }
+.modal { position: absolute; }
+
+.clear {
+    clear: both;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/* styles for validation helpers */
+.field-validation-error {
+    color: #b94a48;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+input.input-validation-error {
+    border: 1px solid #b94a48;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #b94a48;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+.ul-parent {
+    display: inline-block;
+    height: 100px;
+    white-space: nowrap;
+}
+
+.li-parent {
+    box-shadow: 0px 0px 5px grey;
+    width: 250px;
+    display: inline-block;
+    margin: 4px;
+    border-radius: 4px;
+    padding: 15px 10px;
+    font-family: sans-serif;
+    font-weight: bold;
+    color: #555;
+    position: relative;
+    margin-top: 0px;
+    vertical-align: top;
+    background-color: #A6D294;
+}
+
+.li-parent ul{
+    list-style-type: none;
+    -webkit-padding-start: 0px !important; 
+}
+
+.li-parent li{
+    border: solid 1px;
+    margin-left: -20px;
+}
+
+li > #items > li {
+ 	margin: 10px 0px;
+    background: white;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #555;	
+    box-shadow: 1px 1px 2px lightgrey;
+}

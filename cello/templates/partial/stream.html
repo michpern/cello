@@ -1,0 +1,16 @@
+﻿<li class="li-parent" id="stream-{{ stream.id }}">
+    {{ stream.name }}
+    <ul class="ui-sortable" id="items">
+        {% for item in stream.items %}
+        <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.name }} <br /> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }}</li>
+        {% endfor %}
+    </ul>
+    <button id="create-item-{{ stream.id }}">Create new item</button>
+    <script>
+            $("#create-item-{{ stream.id }}").button().on("click", function () {
+                dialog = $("#dialog-form")
+                $("#parentStream").val({{ stream.id }});
+                dialog.dialog("open");
+            });
+    </script>
+</li>

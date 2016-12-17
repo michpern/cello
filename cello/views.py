@@ -1,0 +1,149 @@
+"""
+Routes and views for the flask application.
+"""
+
+from datetime import datetime
+from flask import render_template, request
+from FlaskWebProject1 import app, model
+import FlaskWebProject1.model
+from builtins import print
+
+class uiStream:
+    def __init__(self, id, name, items):
+        self.id = id
+        self.name = name
+        self.items = items
+
+
+def format_date_time(t):
+    # yyyymmddhhmmss
+    if t is None:
+        return ""
+
+    y = t // 10000000000
+    mon = (t // 100000000) % 100
+    d = (t // 1000000) % 100
+    h = (t // 10000) % 100
+    m = (t // 100) % 100
+    s = t % 100
+    r = '{:02d}/{:02d}/{:04d}-{:02d}:{:02d}'.format(d, mon, y, h, m)
+    return r
+
+def get_date_time(dt):
+    y = dt.year
+    mon = dt.month
+    d = dt.day
+    h = dt.hour
+    m = dt.minute
+    s = dt.second
+
+    res = y * 10000000000 + mon * 100000000 + d * 1000000 + h * 10000 + m * 100 + s
+    return res
+
+def get_user_name(u):
+    if u is None:
+        return ""
+
+    user = model.User.get(model.User.id == u)
+    return user.name
+
+app.jinja_env.filters['formatdatetime'] = format_date_time
+app.jinja_env.filters['getusername'] = get_user_name
+    
+@app.before_request
+def before_request():
+    model.database.connect()
+
+@app.after_request
+def after_request(response):
+    model.database.close()
+    return response
+
+@app.route('/home')
+def home():
+    """Renders the home page."""
+    return render_template(
+        'index.html',
+        title='Home Page',
+        year=datetime.now().year,
+    )
+
+@app.route('/contact')
+def contact():
+    """Renders the contact page."""
+    return render_template(
+        'contact.html',
+        title='Contact',
+        year=datetime.now().year,
+        message='Your contact page.'
+    )
+
+@app.route('/about')
+def about():
+    """Renders the about page."""
+    return render_template(
+        'about.html',
+        title='About',
+        year=datetime.now().year,
+        message='Your application description page.'
+    )
+
+@app.route('/')
+@app.route('/project')
+def project():
+    """Renders the project page."""
+    streams = model.Stream.select().order_by(model.Stream.order_in_board)
+    sdict = {}
+    uiStreams = []
+    for stream in streams:
+        stream_items = model.Item.select().where(model.Item.parentstream == stream.id)
+        si = []
+        for i in stream_items:
+            si.append(i)
+
+        print ("Stream: " + stream.name ) 
+
+        print (si)
+        sdict[stream.name] = stream_items
+        uistr = uiStream(stream.id, stream.name, si)
+
+        uiStreams.append(uistr)
+
+    return render_template(
+        'project.html',
+        title='Project',
+        year=datetime.now().year,
+        message='This is a project.',
+        streams=streams,
+        sdict = sdict,
+        uis = uiStreams
+
+    )
+
+
+@app.route('/add_item', methods=['POST'])
+def add_item():
+    data = request.form
+    new_item = model.Item()
+    new_item.name = data['name']
+    new_item.title = data['name']
+    new_item.created = get_date_time(datetime.utcnow())
+    new_item.parentstream = data['parentStream']
+    new_item.save()
+    stream_id = data['parentStream']
+
+    stream = model.Stream.get(model.Stream.id == stream_id)
+    stream_items = model.Item.select().where(model.Item.parentstream == stream_id)
+    si = []
+    for i in stream_items:
+        si.append(i)
+
+    print ("Stream: " + stream.name ) 
+
+    print (si)   
+    uistr = uiStream(stream.id, stream.name, si)
+
+    return render_template(
+        'partial/stream.html',
+        stream=uistr
+    )
