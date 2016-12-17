@@ -4,8 +4,8 @@ Routes and views for the flask application.
 
 from datetime import datetime
 from flask import render_template, request
-from FlaskWebProject1 import app, model
-import FlaskWebProject1.model
+from cello import app, model
+import cello.model
 from builtins import print
 
 class uiStream:
@@ -96,7 +96,7 @@ def project():
     sdict = {}
     uiStreams = []
     for stream in streams:
-        stream_items = model.Item.select().where(model.Item.parentstream == stream.id)
+        stream_items = model.Item.select().where(model.Item.parentstream == stream.id).order_by(model.Item.orderInStream)
         si = []
         for i in stream_items:
             si.append(i)
@@ -133,7 +133,7 @@ def add_item():
     stream_id = data['parentStream']
 
     stream = model.Stream.get(model.Stream.id == stream_id)
-    stream_items = model.Item.select().where(model.Item.parentstream == stream_id)
+    stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
     si = []
     for i in stream_items:
         si.append(i)
@@ -147,3 +147,22 @@ def add_item():
         'partial/stream.html',
         stream=uistr
     )
+@app.route('/move_item')
+def move_item():
+    # item-<parent-id>-<item-id>
+    old_pos = request.args.get("old_pos")
+    # 4
+    new_pos = request.args.get("new_pos")
+    # stream-4
+    parent = request.args.get("new_parent")
+
+    old_parts = old_pos.split("-")
+    item_id = old_parts[2]
+    parent_id = parent.split("-")[1]
+
+    query = model.Item.update(orderInStream=model.Item.orderInStream+1).where(model.Item.parentstream == parent_id and model.Item.orderInStream >= new_pos )
+    query.execute()
+    query = model.Item.update(parentstream=parent_id, orderInStream=new_pos).where(model.Item.id == item_id)
+    query.execute()
+
+    return ""

@@ -20,7 +20,24 @@
                 padding: .4em;
             }
     </style>
+    <script>
+        function move_item(old_pos, new_pos, new_parent) {
+            $.ajax({
+                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent,                   //
+                timeout: 30000,
+                type: "GET",
 
+                dataType: 'html',
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("An error has occurred making the request: " + errorThrown)
+                },
+                success: function (data) {
+
+                    return true
+                }
+            });
+        }
+    </script>
     <script>
     $(function () {
         var dialog, form
@@ -71,6 +88,8 @@
         $("#create-item").button().on("click", function () {
             dialog.dialog("open");
         });
+
+
     });
 
     var binder = function () {
@@ -105,7 +124,9 @@
                 stop: function (event, ui) {
                     console.log("Start position: " + ui.item.startPos);
                     console.log("New position: " + ui.item.index());
+                    parent = ui.item.parent().parent().attr('id')
                     console.log("ID:" + ui.item.savedId);
+                    move_item(ui.item.savedId, ui.item.index(), parent)
                 }
             }).disableSelection();
         });

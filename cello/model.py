@@ -29,7 +29,7 @@ class Item(BaseModel):
     parentstream = IntegerField(db_column='parentStream')
     reportedby = IntegerField(db_column='reportedBy', null=True)
     title = TextField()
-
+    orderInStream = IntegerField(db_column='orderInStream', null=True)
     class Meta:
         db_table = 'Item'
 

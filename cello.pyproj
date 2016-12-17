@@ -18,7 +18,7 @@
     <StaticUriRewrite>^/$(MSBuildProjectName)/static/.*</StaticUriRewrite>
     <PythonWsgiHandler>$(MSBuildProjectName).app</PythonWsgiHandler>
     <Name>cello</Name>
-    <RootNamespace>FlaskWebProject1</RootNamespace>
+    <RootNamespace>cello</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,52 +29,52 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="FlaskWebProject1\model.py">
+    <Compile Include="cello\model.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="runserver.py" />
-    <Compile Include="FlaskWebProject1\__init__.py" />
-    <Compile Include="FlaskWebProject1\views.py" />
+    <Compile Include="cello\__init__.py" />
+    <Compile Include="cello\views.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="cello\" />
-    <Folder Include="FlaskWebProject1\static\" />
-    <Folder Include="FlaskWebProject1\static\content\" />
-    <Folder Include="FlaskWebProject1\static\fonts\" />
-    <Folder Include="FlaskWebProject1\static\scripts\" />
-    <Folder Include="FlaskWebProject1\templates\" />
-    <Folder Include="FlaskWebProject1\templates\partial\" />
+    <Folder Include="cello\static\" />
+    <Folder Include="cello\static\content\" />
+    <Folder Include="cello\static\fonts\" />
+    <Folder Include="cello\static\scripts\" />
+    <Folder Include="cello\templates\" />
+    <Folder Include="cello\templates\partial\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="FlaskWebProject1\templates\partial\stream.html" />
-    <Content Include="FlaskWebProject1\templates\project.html" />
+    <Content Include="cello\templates\partial\stream.html" />
+    <Content Include="cello\templates\project.html" />
     <Content Include="requirements.txt" />
-    <Content Include="FlaskWebProject1\static\content\bootstrap.css" />
-    <Content Include="FlaskWebProject1\static\content\bootstrap.min.css" />
-    <Content Include="FlaskWebProject1\static\content\site.css" />
-    <Content Include="FlaskWebProject1\static\fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="FlaskWebProject1\static\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="FlaskWebProject1\static\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="FlaskWebProject1\static\fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="FlaskWebProject1\static\scripts\bootstrap.js" />
-    <Content Include="FlaskWebProject1\static\scripts\bootstrap.min.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery-1.10.2.intellisense.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery-1.10.2.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery-1.10.2.min.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery-1.10.2.min.map" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery.validate-vsdoc.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery.validate.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery.validate.min.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery.validate.unobtrusive.js" />
-    <Content Include="FlaskWebProject1\static\scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="FlaskWebProject1\static\scripts\modernizr-2.6.2.js" />
-    <Content Include="FlaskWebProject1\static\scripts\respond.js" />
-    <Content Include="FlaskWebProject1\static\scripts\respond.min.js" />
-    <Content Include="FlaskWebProject1\static\scripts\_references.js" />
-    <Content Include="FlaskWebProject1\templates\about.html" />
-    <Content Include="FlaskWebProject1\templates\contact.html" />
-    <Content Include="FlaskWebProject1\templates\index.html" />
-    <Content Include="FlaskWebProject1\templates\layout.html" />
+    <Content Include="cello\static\content\bootstrap.css" />
+    <Content Include="cello\static\content\bootstrap.min.css" />
+    <Content Include="cello\static\content\site.css" />
+    <Content Include="cello\static\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="cello\static\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="cello\static\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="cello\static\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="cello\static\scripts\bootstrap.js" />
+    <Content Include="cello\static\scripts\bootstrap.min.js" />
+    <Content Include="cello\static\scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="cello\static\scripts\jquery-1.10.2.js" />
+    <Content Include="cello\static\scripts\jquery-1.10.2.min.js" />
+    <Content Include="cello\static\scripts\jquery-1.10.2.min.map" />
+    <Content Include="cello\static\scripts\jquery.validate-vsdoc.js" />
+    <Content Include="cello\static\scripts\jquery.validate.js" />
+    <Content Include="cello\static\scripts\jquery.validate.min.js" />
+    <Content Include="cello\static\scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="cello\static\scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="cello\static\scripts\modernizr-2.6.2.js" />
+    <Content Include="cello\static\scripts\respond.js" />
+    <Content Include="cello\static\scripts\respond.min.js" />
+    <Content Include="cello\static\scripts\_references.js" />
+    <Content Include="cello\templates\about.html" />
+    <Content Include="cello\templates\contact.html" />
+    <Content Include="cello\templates\index.html" />
+    <Content Include="cello\templates\layout.html" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
   <!-- Specify pre- and post-build commands in the BeforeBuild and 
