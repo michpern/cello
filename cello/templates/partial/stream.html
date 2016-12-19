@@ -8,8 +8,11 @@
     <button id="create-item-{{ stream.id }}">Create new item</button>
     <script>
             $("#create-item-{{ stream.id }}").button().on("click", function () {
-                dialog = $("#dialog-form")
+                dialog = make_dialog(false); // $("#dialog-form")
                 $("#parentStream").val({{ stream.id }});
+                $("#itemid").val(-1);
+                $('#name').val('');
+                $('#description').val('');
                 dialog.dialog("open");
             });
     </script>

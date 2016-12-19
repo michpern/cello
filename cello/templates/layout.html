@@ -21,6 +21,7 @@
             }
     </style>
     <script>
+        var dialog, form;
         function move_item(old_pos, new_pos, new_parent) {
             $.ajax({
                 url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent,                   //
@@ -32,20 +33,33 @@
                     alert("An error has occurred making the request: " + errorThrown)
                 },
                 success: function (data) {
-
                     return true
                 }
             });
         }
-    </script>
-    <script>
-    $(function () {
-        var dialog, form
-        function addUser() {
+
+        function get_item(item_id) {
+            return $.ajax({
+                url: "/get_item?id=" + item_id,
+                timeout: 30000,
+                type: "GET",
+
+                dataType: 'html',
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("An error has occurred making the request: " + errorThrown)
+                },
+                success: function (data) {
+                    var item = JSON.parse(data);
+                    return item;
+                }
+            });
+        }
+
+        function saveitem() {
             var ps = $("#parentStream")
             streamId = ps.val()
             $.ajax({
-                url: "/add_item",                   //
+                url: "/save_item",                   //
                 timeout: 30000,
                 type: "POST",
                 data: form.serialize(),
@@ -56,33 +70,85 @@
                 success: function (data) {
                     dialog.dialog("close")
                     sid = "#stream-" + streamId
-                    stream_li = $(sid)
-                    stream_li.replaceWith(data)
+                    stream_li = $(sid);
+                    stream_li.replaceWith(data);
+                    set_item_handlers();
                     return true
                 }
             });
         }
-
-    dialog = $("#dialog-form").dialog({
-        autoOpen: false,
-        height: 400,
-        width: 350,
-        modal: true,
-        buttons: {
-            "Create item": addUser,
-            Cancel: function () {
-                dialog.dialog("close");
+        function make_dialog(is_update) {
+            if (is_update) {
+                button_text = "Update item";
+                title = "Edit item";
+            } else {
+                button_text = "Create item";
+                title = "New item.";
             }
-        },
-        close: function () {
-            form[0].reset();
-/*            allFields.removeClass("ui-state-error");  */
+
+            var dialog_buttons = {};
+            dialog_buttons[button_text] = function () { saveitem(); }
+            dialog_buttons['Cancel'] = function () { $(this).dialog('close'); }
+
+            d = $("#dialog-form").dialog({
+                title: title,
+                autoOpen: false,
+                height: 400,
+                width: 350,
+                modal: true,
+                buttons: dialog_buttons
+
+            });
+            form = d.find("form");
+            return d;
         }
-    });
+
+        function set_item_handlers() {
+            $("li #items").sortable({
+                connectWith: "li #items",
+                /*                placeholder: "highlight", */
+                cancel: ".cancel_drag",
+                items: '> :not(.cancel_drag)',
+                start: function (event, ui) {
+                    ui.placeholder.height(ui.helper.outerHeight());
+                    ui.placeholder.width(ui.helper.outerWidth());
+                    ui.item.startPos = ui.item.index();
+                    ui.item.savedId = ui.item[0].id;
+                },
+                stop: function (event, ui) {
+                    console.log("Start position: " + ui.item.startPos);
+                    console.log("New position: " + ui.item.index());
+                    parent = ui.item.parent().parent().attr('id')
+                    console.log("ID:" + ui.item.savedId);
+                    move_item(ui.item.savedId, ui.item.index(), parent)
+                }
+            }).bind('dblclick', function (event) {
+                full_id = ($(event.target).attr('id'));
+                id = full_id.split("-")[2];
+                $.when(get_item(id)).done(function (data) {
+                    item = JSON.parse(data);
+                    dialog = make_dialog(true)
+                    form = dialog.find("form");
+                    $("#parentStream").val(item.parentstream);
+                    $("#itemid").val(item.id);
+                    $('#name').val(item.name);
+                    $('#description').val(item.description);
+                    dialog.dialog("open");
+                });
+
+            }).disableSelection();
+        }
+    </script>
+    <script>
+    $(function () {
+        var dialog, form
+ 
+
+        dialog = make_dialog(false);
 
         form = dialog.find("form").on("submit", function (event) {
             event.preventDefault();
-            addUser();
+            saveitem();
         });
 
         $("#create-item").button().on("click", function () {
@@ -108,33 +174,16 @@
             }).disableSelection();
         });
 
-        //for shuffling of the cards
+
         $(function () {
-            $("li #items").sortable({
-                connectWith: "li #items",
-/*                placeholder: "highlight", */
-                cancel: ".cancel_drag",
-                items: '> :not(.cancel_drag)',
-                start: function (event, ui) {
-                    ui.placeholder.height(ui.helper.outerHeight());
-                    ui.placeholder.width(ui.helper.outerWidth());
-                    ui.item.startPos = ui.item.index();
-                    ui.item.savedId = ui.item[0].id;
-                },
-                stop: function (event, ui) {
-                    console.log("Start position: " + ui.item.startPos);
-                    console.log("New position: " + ui.item.index());
-                    parent = ui.item.parent().parent().attr('id')
-                    console.log("ID:" + ui.item.savedId);
-                    move_item(ui.item.savedId, ui.item.index(), parent)
-                }
-            }).disableSelection();
-        });
+            set_item_handlers();
+        })
 
 
     }
 
-    binder()
+    binder();
+    
     </script>
 </head>
 

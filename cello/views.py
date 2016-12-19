@@ -3,7 +3,9 @@ Routes and views for the flask application.
 """
 
 from datetime import datetime
+import json
 from flask import render_template, request
+from playhouse.shortcuts import *
 from cello import app, model
 import cello.model
 from builtins import print
@@ -120,15 +122,29 @@ def project():
 
     )
 
+def get_current_user():
+    return 2
 
-@app.route('/add_item', methods=['POST'])
-def add_item():
+def set_item_from_data(item, data):
+    item.name = data['name']
+    item.title = data['name']
+    item.description = data['description']
+    item.lastupdated = get_date_time(datetime.utcnow())
+    item.lasupdateby = get_current_user()
+    item.parentstream = data['parentStream']
+
+@app.route('/save_item', methods=['POST'])
+def save_item():
     data = request.form
-    new_item = model.Item()
-    new_item.name = data['name']
-    new_item.title = data['name']
-    new_item.created = get_date_time(datetime.utcnow())
-    new_item.parentstream = data['parentStream']
+    item_id = data['itemid']
+    if (item_id == '-1'):
+        new_item = model.Item()
+        new_item.created = get_date_time(datetime.utcnow())
+        new_item.reportedby = get_current_user()
+    else:
+        new_item = model.Item.get(model.Item.id == item_id)
+
+    set_item_from_data(new_item, data)
     new_item.save()
     stream_id = data['parentStream']
 
@@ -166,3 +182,11 @@ def move_item():
     query.execute()
 
     return ""
+
+@app.route('/get_item')
+def get_item():   
+    item_id = request.args.get("id")
+    item = model.Item.get(model.Item.id == item_id)
+    retval = json.dumps(model_to_dict(item))
+    return retval
+    
