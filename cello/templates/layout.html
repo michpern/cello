@@ -93,8 +93,8 @@
             d = $("#dialog-form").dialog({
                 title: title,
                 autoOpen: false,
-                height: 400,
-                width: 350,
+                height: 800,
+                width: 600,
                 modal: true,
                 buttons: dialog_buttons
 
@@ -133,6 +133,7 @@
                     $("#itemid").val(item.id);
                     $('#name').val(item.name);
                     $('#description').val(item.description);
+                    $('#lastupdated').html(item.lastupdated);
                     dialog.dialog("open");
                 });
 

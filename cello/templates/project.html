@@ -7,12 +7,12 @@
 <div id="dialog-form" title="Create New Item">
     <form>
         <fieldset>
-            <label for="name">Name</label>
-            <label for="description">Description</label>
+            <label>Name<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" /></label>
+            <label>Description<textarea name="description" id="description" class="text ui-widget-content ui-corner-all"></textarea></label>
             <input type="hidden" id="parentStream" name="parentStream"/>
             <input type="hidden" id="itemid" name="itemid" />
-            <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
-            <textarea name="description" id="description" class="text ui-widget-content ui-corner-all" ></textarea>
+            <div>Last updated<span name="lastupdated" id="lastupdated" ></span></div>
+            
             <!-- Allow form submission with keyboard without duplicating the dialog button -->
             <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>

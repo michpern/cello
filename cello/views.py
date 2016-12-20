@@ -130,7 +130,7 @@ def set_item_from_data(item, data):
     item.title = data['name']
     item.description = data['description']
     item.lastupdated = get_date_time(datetime.utcnow())
-    item.lasupdateby = get_current_user()
+    item.lastupdatedby = get_current_user()
     item.parentstream = data['parentStream']
 
 @app.route('/save_item', methods=['POST'])
@@ -187,6 +187,9 @@ def move_item():
 def get_item():   
     item_id = request.args.get("id")
     item = model.Item.get(model.Item.id == item_id)
-    retval = json.dumps(model_to_dict(item))
+    d = model_to_dict(item)
+    d['lastupdated'] = format_date_time(d['lastupdated']) + " " + get_user_name(d['lastupdatedby'])
+    retval = json.dumps(d)
+   
     return retval
     
