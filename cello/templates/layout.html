@@ -106,9 +106,9 @@
         function set_item_handlers() {
             $("li #items").sortable({
                 connectWith: "li #items",
-                /*                placeholder: "highlight", */
+                placeholder: "highlight",
                 cancel: ".cancel_drag",
-                items: '> :not(.cancel_drag)',
+                items: '> li:not(.cancel_drag)',
                 start: function (event, ui) {
                     ui.placeholder.height(ui.helper.outerHeight());
                     ui.placeholder.width(ui.helper.outerWidth());

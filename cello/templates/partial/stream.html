@@ -4,8 +4,11 @@
         {% for item in stream.items %}
         <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.name }} <br /> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }}</li>
         {% endfor %}
+        <li class="cancel_drag">
+            <button id="create-item-{{ stream.id }}">Create new item</button>
+        </li>
     </ul>
-    <button id="create-item-{{ stream.id }}">Create new item</button>
+    
     <script>
             $("#create-item-{{ stream.id }}").button().on("click", function () {
                 dialog = make_dialog(false); // $("#dialog-form")
