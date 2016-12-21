@@ -30,6 +30,7 @@ class Item(BaseModel):
     reportedby = IntegerField(db_column='reportedBy', null=True)
     title = TextField()
     orderInStream = IntegerField(db_column='orderInStream', null=True)
+    itemtype = IntegerField(db_column='itemtype', null=True)
     class Meta:
         db_table = 'Item'
 

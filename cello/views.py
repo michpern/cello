@@ -145,6 +145,8 @@ def set_item_from_data(item, data):
     item.lastupdated = get_date_time(datetime.utcnow())
     item.lastupdatedby = get_current_user()
     item.parentstream = data['parentStream']
+    item.itemtype = int(data['itemtype'])
+    
 
 @app.route('/save_item', methods=['POST'])
 def save_item():
