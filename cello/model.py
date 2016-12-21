@@ -56,6 +56,15 @@ class User(BaseModel):
     class Meta:
         db_table = 'User'
 
+class Comment(BaseModel):
+    parentitem = IntegerField(db_column='parentItem')
+    comment = TextField(null=True)
+    lastupdated = IntegerField(db_column='lastUpdated', null=True)
+    lastupdatedby = IntegerField(db_column='lastUpdatedBy', null=True)
+
+    class Meta:
+        db_table = 'Comment'
+
 class SqliteSequence(BaseModel):
     name = UnknownField(null=True)  #
     seq = UnknownField(null=True)  #

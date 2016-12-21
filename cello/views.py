@@ -16,6 +16,19 @@ class uiStream:
         self.name = name
         self.items = items
 
+class uiComment:
+    def __init__(self, id, comment, lastupdated, lastupdatedby):
+        self.id = id
+        self.comment = comment
+        self.lastupdated = lastupdated
+        self.lastupdatedby = lastupdatedby
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
+def jdefault(o):
+    return o.__dict__
 
 def format_date_time(t):
     # yyyymmddhhmmss
@@ -137,6 +150,7 @@ def set_item_from_data(item, data):
 def save_item():
     data = request.form
     item_id = data['itemid']
+    
     if (item_id == '-1'):
         new_item = model.Item()
         new_item.created = get_date_time(datetime.utcnow())
@@ -146,6 +160,15 @@ def save_item():
 
     set_item_from_data(new_item, data)
     new_item.save()
+
+    if (data['newcomment'] != ''):
+        new_comment = model.Comment()
+        new_comment.comment = data['newcomment']
+        new_comment.lastupdated = get_date_time(datetime.utcnow())
+        new_comment.lastupdatedby = get_current_user()
+        new_comment.parentitem = new_item.id
+        new_comment.save()
+
     stream_id = data['parentStream']
 
     stream = model.Stream.get(model.Stream.id == stream_id)
@@ -187,9 +210,18 @@ def move_item():
 def get_item():   
     item_id = request.args.get("id")
     item = model.Item.get(model.Item.id == item_id)
+    dbcomments = model.Comment.select().where(model.Comment.parentitem == item_id).order_by(model.Comment.lastupdated.desc())
+    comments = []
+    for i in dbcomments:
+        lu = format_date_time(i.lastupdated)
+        lub = get_user_name(i.lastupdatedby)
+
+        comments.append(uiComment(i.id, i.comment, lu, lub))
+
     d = model_to_dict(item)
     d['lastupdated'] = format_date_time(d['lastupdated']) + " " + get_user_name(d['lastupdatedby'])
-    retval = json.dumps(d)
+    d['comments'] = comments
+    retval = json.dumps(d, default=jdefault)
    
     return retval
     

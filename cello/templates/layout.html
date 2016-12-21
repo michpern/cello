@@ -133,7 +133,14 @@
                     $("#itemid").val(item.id);
                     $('#name').val(item.name);
                     $('#description').val(item.description);
+                    $('#newcomment').val('');
                     $('#lastupdated').html(item.lastupdated);
+                    $('#comments').html('');
+                    comments = item.comments;
+                    num_comments = comments.length;
+                    for (var i =0; i<num_comments; i++) {
+                        $('#comments').append("<div class='comment'>" + comments[i].comment + " " + comments[i].lastupdatedby + " " + comments[i].lastupdated+ "</div>");
+                    }
                     dialog.dialog("open");
                 });
 
