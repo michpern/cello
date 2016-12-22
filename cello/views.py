@@ -10,6 +10,7 @@ from cello import app, model
 import cello.model
 from builtins import print
 
+
 class uiStream:
     def __init__(self, id, name, items):
         self.id = id
@@ -138,6 +139,16 @@ def project():
 def get_current_user():
     return 2
 
+def get_next_feature_id(parentStreamId):
+    stream = model.Stream.get(model.Stream.id == parentStreamId)
+    project = model.Project.get(model.Project.id == stream.parentboard)
+    stem = project.gitstem
+    featureId = project.lastId
+    featureId = featureId + 1
+    query = model.Project.update(lastId = featureId).where(model.Project.id == project.id)
+    query.execute()
+    return stem + "-" + str(featureId).zfill(3)
+
 def set_item_from_data(item, data):
     item.name = data['name']
     item.title = data['name']
@@ -157,6 +168,7 @@ def save_item():
         new_item = model.Item()
         new_item.created = get_date_time(datetime.utcnow())
         new_item.reportedby = get_current_user()
+        new_item.featureId = get_next_feature_id(data['parentStream'])
     else:
         new_item = model.Item.get(model.Item.id == item_id)
 

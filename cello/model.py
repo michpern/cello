@@ -31,12 +31,14 @@ class Item(BaseModel):
     title = TextField()
     orderInStream = IntegerField(db_column='orderInStream', null=True)
     itemtype = IntegerField(db_column='itemtype', null=True)
+    featureId =  TextField(null=True)
     class Meta:
         db_table = 'Item'
 
 class Project(BaseModel):
     gitstem = TextField(null=True)
     name = TextField()
+    lastId = IntegerField(db_column='lastId', null=True)
 
     class Meta:
         db_table = 'Project'

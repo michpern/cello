@@ -2,7 +2,7 @@
     {{ stream.name }}
     <ul class="ui-sortable" id="items">
         {% for item in stream.items %}
-        <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.name }} <br /> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }}</li>
+        <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.featureId }}/{{ item.name }} <br /> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }}</li>
         {% endfor %}
         <li class="cancel_drag">
             <button id="create-item-{{ stream.id }}">Create new item</button>
