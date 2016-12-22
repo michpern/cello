@@ -33,6 +33,10 @@
                     alert("An error has occurred making the request: " + errorThrown)
                 },
                 success: function (data) {
+                    sid = '#' + new_parent
+                    stream_li = $(sid);
+                    stream_li.replaceWith(data);
+                    set_item_handlers();
                     return true
                 }
             });

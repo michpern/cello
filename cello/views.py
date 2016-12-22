@@ -63,6 +63,19 @@ def get_user_name(u):
     user = model.User.get(model.User.id == u)
     return user.name
 
+def get_UI_stream(stream_id):
+    stream = model.Stream.get(model.Stream.id == stream_id)
+    stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
+    si = []
+    for i in stream_items:
+        si.append(i)
+
+    print ("Stream: " + stream.name ) 
+
+    print (si)   
+    uistr = uiStream(stream.id, stream.name, si)
+    return uistr
+
 app.jinja_env.filters['formatdatetime'] = format_date_time
 app.jinja_env.filters['getusername'] = get_user_name
     
@@ -112,17 +125,7 @@ def project():
     sdict = {}
     uiStreams = []
     for stream in streams:
-        stream_items = model.Item.select().where(model.Item.parentstream == stream.id).order_by(model.Item.orderInStream)
-        si = []
-        for i in stream_items:
-            si.append(i)
-
-        print ("Stream: " + stream.name ) 
-
-        print (si)
-        sdict[stream.name] = stream_items
-        uistr = uiStream(stream.id, stream.name, si)
-
+        uistr = get_UI_stream(stream.id)
         uiStreams.append(uistr)
 
     return render_template(
@@ -184,17 +187,7 @@ def save_item():
         new_comment.save()
 
     stream_id = data['parentStream']
-
-    stream = model.Stream.get(model.Stream.id == stream_id)
-    stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
-    si = []
-    for i in stream_items:
-        si.append(i)
-
-    print ("Stream: " + stream.name ) 
-
-    print (si)   
-    uistr = uiStream(stream.id, stream.name, si)
+    uistr = get_UI_stream(stream_id)
 
     return render_template(
         'partial/stream.html',
@@ -215,10 +208,18 @@ def move_item():
 
     query = model.Item.update(orderInStream=model.Item.orderInStream+1).where(model.Item.parentstream == parent_id and model.Item.orderInStream >= new_pos )
     query.execute()
-    query = model.Item.update(parentstream=parent_id, orderInStream=new_pos).where(model.Item.id == item_id)
+
+    lud = get_date_time(datetime.utcnow())
+    ludb = get_current_user()
+    query = model.Item.update(parentstream=parent_id, orderInStream=new_pos, lastupdated=lud, lastupdatedby=ludb).where(model.Item.id == item_id)
     query.execute()
 
-    return ""
+    uistr = get_UI_stream(parent_id)
+    return render_template(
+        'partial/stream.html',
+        stream=uistr
+    )
+
 
 @app.route('/get_item')
 def get_item():   
