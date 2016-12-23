@@ -12,9 +12,10 @@ from builtins import print
 
 
 class uiStream:
-    def __init__(self, id, name, items):
+    def __init__(self, id, name, allow_direct_add, items):
         self.id = id
         self.name = name
+        self.allow_direct_add = allow_direct_add
         self.items = items
 
 class uiComment:
@@ -73,7 +74,7 @@ def get_UI_stream(stream_id):
     print ("Stream: " + stream.name ) 
 
     print (si)   
-    uistr = uiStream(stream.id, stream.name, si)
+    uistr = uiStream(stream.id, stream.name, stream.allow_direct_add, si)
     return uistr
 
 app.jinja_env.filters['formatdatetime'] = format_date_time

@@ -47,6 +47,7 @@ class Stream(BaseModel):
     name = TextField(null=True)
     parentboard = IntegerField(db_column='parentBoard')
     order_in_board = IntegerField(db_column='orderInBoard')
+    allow_direct_add = IntegerField(db_column='allowDirectAdd')
 
     class Meta:
         db_table = 'Stream'
