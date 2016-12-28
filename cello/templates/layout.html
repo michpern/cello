@@ -138,13 +138,25 @@
                     $('#name').val(item.name);
                     $('#description').val(item.description);
                     $('#newcomment').val('');
+                    $('#newchecklistitem').val('');
                     $('#lastupdated').html(item.lastupdated);
                     $('#comments').html('');
+                    $('#checklist').html('');
                     $('#itemtype').val(item.itemtype);
                     comments = item.comments;
                     num_comments = comments.length;
                     for (var i =0; i<num_comments; i++) {
                         $('#comments').append("<div class='comment'>" + comments[i].comment + " " + comments[i].lastupdatedby + " " + comments[i].lastupdated+ "</div>");
+                    }
+                    checklist = item.checklist;
+                    num_clitems = checklist.length;
+                    for (var i = 0; i < num_clitems; i++) {
+                        var checked = ""
+                        if (checklist[i].completed == 1) {
+                            checked = "checked"
+                        }
+                        $('#checklist').append("<input type='checkbox' name='clic-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + "' " + checked + " class='checklistitem'>" + checklist[i].itemtext + "<br/>");
+                        $('#checklist').append("<input type='hidden' name='clih-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + ">");
                     }
                     dialog.dialog("open");
                 });

@@ -69,6 +69,15 @@ class Comment(BaseModel):
     class Meta:
         db_table = 'Comment'
 
+class ChecklistItem(BaseModel):
+    parentitem = IntegerField(db_column='parentItem')
+    checklisttext =  TextField(null=True)
+    lastupdated = IntegerField(db_column='lastUpdated', null=True)
+    lastupdatedby = IntegerField(db_column='lastUpdatedBy', null=True)
+    completed = IntegerField(db_column='completed')
+
+    class Meta:
+        db_table = 'ChecklistItem'
 class SqliteSequence(BaseModel):
     name = UnknownField(null=True)  #
     seq = UnknownField(null=True)  #

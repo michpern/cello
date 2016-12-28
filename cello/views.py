@@ -29,6 +29,14 @@ class uiComment:
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
+class uiChecklistItem:
+    def __init__(self, id, itemtext, lastupdated, lastupdatedby, completed):
+        self.id = id
+        self.itemtext = itemtext
+        self.lastupdated = lastupdated
+        self.lastupdatedby = lastupdatedby
+        self.completed = completed
+
 def jdefault(o):
     return o.__dict__
 
@@ -76,6 +84,26 @@ def get_UI_stream(stream_id):
     print (si)   
     uistr = uiStream(stream.id, stream.name, stream.allow_direct_add, si)
     return uistr
+
+def update_checklist_items(item_id, form_data):
+    dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id).order_by(model.ChecklistItem.lastupdated.desc())
+    if dbchecklist.count() == 0:
+        return
+
+    all_items = {k:v for k,v in form_data.items() if k.startswith('clih')}
+    checked_items = {k:v for k,v in form_data.items() if k.startswith('clic')}
+    for i in dbchecklist: 
+        key = "clic-" + str(item_id) + "-" + str(i.id)
+
+        if key in checked_items:
+            if i.completed is None or i.completed == 0:
+                query = model.ChecklistItem.update(completed=1, lastupdated=get_date_time(datetime.utcnow()), lastupdatedby=get_current_user()).where(model.ChecklistItem.id == i.id)
+                query.execute()
+        else:
+            if i.completed == 1:
+                query = model.ChecklistItem.update(completed=0, lastupdated=get_date_time(datetime.utcnow()), lastupdatedby=get_current_user()).where(model.ChecklistItem.id == i.id)
+                query.execute()
+
 
 app.jinja_env.filters['formatdatetime'] = format_date_time
 app.jinja_env.filters['getusername'] = get_user_name
@@ -187,6 +215,17 @@ def save_item():
         new_comment.parentitem = new_item.id
         new_comment.save()
 
+    if (data['newchecklistitem']):
+        new_checklistitem = model.ChecklistItem()
+        new_checklistitem.checklisttext = data['newchecklistitem']
+        new_checklistitem.lastupdated = get_date_time(datetime.utcnow())
+        new_checklistitem.lastupdatedby = get_current_user()
+        new_checklistitem.parentitem = new_item.id
+        new_checklistitem.completed = 0
+        new_checklistitem.save()
+
+    update_checklist_items(item_id, data)
+
     stream_id = data['parentStream']
     uistr = get_UI_stream(stream_id)
 
@@ -206,6 +245,8 @@ def move_item():
     old_parts = old_pos.split("-")
     item_id = old_parts[2]
     parent_id = parent.split("-")[1]
+
+    uncompleted_checklist_count = dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id and model.ChecklistItem.completed == 0).count()
 
     query = model.Item.update(orderInStream=model.Item.orderInStream+1).where(model.Item.parentstream == parent_id and model.Item.orderInStream >= new_pos )
     query.execute()
@@ -227,6 +268,7 @@ def get_item():
     item_id = request.args.get("id")
     item = model.Item.get(model.Item.id == item_id)
     dbcomments = model.Comment.select().where(model.Comment.parentitem == item_id).order_by(model.Comment.lastupdated.desc())
+    dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id).order_by(model.ChecklistItem.lastupdated.desc())
     comments = []
     for i in dbcomments:
         lu = format_date_time(i.lastupdated)
@@ -234,10 +276,16 @@ def get_item():
 
         comments.append(uiComment(i.id, i.comment, lu, lub))
 
+    checklist = []
+    for i in dbchecklist:
+        lu = format_date_time(i.lastupdated)
+        lub = get_user_name(i.lastupdatedby)
+        checklist.append(uiChecklistItem(i.id, i.checklisttext, lu, lub, i.completed))
+
     d = model_to_dict(item)
     d['lastupdated'] = format_date_time(d['lastupdated']) + " " + get_user_name(d['lastupdatedby'])
     d['comments'] = comments
+    d['checklist'] = checklist
     retval = json.dumps(d, default=jdefault)
    
     return retval
-    
