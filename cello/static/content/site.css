@@ -91,4 +91,5 @@ li > #items > li {
     font-weight: normal;
     color: #555;	
     box-shadow: 1px 1px 2px lightgrey;
+    white-space: normal;
 }
