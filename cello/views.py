@@ -18,6 +18,26 @@ class uiStream:
         self.allow_direct_add = allow_direct_add
         self.items = items
 
+class uiItem:
+    def __init__(self, id, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments):
+        self.id = id
+        self.featureId = featureId
+        self.name = name
+        self.lastupdated = lastupdated
+        self.lastupdatedby = lastupdatedby
+        self.checklistitemcount = checklistitemcount
+        self.checklistitemcompleted = checklistitemcompleted
+        self.checklisttext = checklisttext
+        if description is None:
+            self.description = ""
+        else:
+            self.description = description
+
+        if comments is None:
+            self.comments = ""
+        else:
+            self.comments = comments
+
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
         self.id = id
@@ -72,12 +92,44 @@ def get_user_name(u):
     user = model.User.get(model.User.id == u)
     return user.name
 
+def get_comment_info(item_id):
+    dbcomments = model.Comment.select().where(model.Comment.parentitem == item_id).order_by(model.Comment.lastupdated.desc())
+    comments = ""
+    count = 0
+    for i in dbcomments:
+        lu = format_date_time(i.lastupdated)
+        lub = get_user_name(i.lastupdatedby)
+
+        comments = comments +  i.comment + "<br/>"
+        count = count + 1
+        if (count > 2):
+            break
+    return comments
+
+def get_checklist_info(item_id):
+    total = 0
+    completed = 0
+    text = ""
+    dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id)
+    total = dbchecklist.count()
+    for i in dbchecklist:
+        if i.completed == 1:
+            completed = completed + 1
+            text = text + "<s>" + i.checklisttext + "</s><br/>"
+        else:
+            text = text + i.checklisttext + "<br/>"
+
+    return total,completed, text
+
 def get_UI_stream(stream_id):
     stream = model.Stream.get(model.Stream.id == stream_id)
     stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
     si = []
     for i in stream_items:
-        si.append(i)
+        checklisttotal, checklistitemcompleted, checklisttext = get_checklist_info(i.id)
+        comments = get_comment_info(i.id)
+        uii = uiItem(i.id, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments)
+        si.append(uii)
 
     print ("Stream: " + stream.name ) 
 

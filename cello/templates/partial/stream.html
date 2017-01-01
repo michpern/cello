@@ -2,7 +2,18 @@
     {{ stream.name }}
     <ul class="ui-sortable" id="items">
         {% for item in stream.items %}
-        <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.featureId }}/{{ item.name }} <br /> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }}</li>
+            <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.featureId }}/{{ item.name }} <br /> 
+                {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} <br />
+                {% if item.checklistitemcount > 0 %}
+                   <span class="glyphicon glyphicon-list" title="{{ item.checklisttext }}"></span> {{ item.checklistitemcompleted }}/{{ item.checklistitemcount }} 
+                {% endif %}
+                {% if item.description != "" %}
+                   <span class="glyphicon glyphicon-align-justify" title="{{ item.description }}"></span>
+                {% endif %}
+                {% if item.comments != "" %}
+                    <span class="glyphicon glyphicon-comment" title="{{ item.comments }}"></span>
+                {% endif %}
+            </li>
         {% endfor %}
         
         <li class="cancel_drag">
