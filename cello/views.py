@@ -19,8 +19,9 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments):
         self.id = id
+        self.type = type
         self.featureId = featureId
         self.name = name
         self.lastupdated = lastupdated
@@ -128,7 +129,7 @@ def get_UI_stream(stream_id):
     for i in stream_items:
         checklisttotal, checklistitemcompleted, checklisttext = get_checklist_info(i.id)
         comments = get_comment_info(i.id)
-        uii = uiItem(i.id, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments)
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 

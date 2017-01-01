@@ -2,7 +2,15 @@
     {{ stream.name }}
     <ul class="ui-sortable" id="items">
         {% for item in stream.items %}
-            <li id="item-{{ stream.id }}-{{ item.id }}"> {{ item.featureId }}/{{ item.name }} <br /> 
+            <li id="item-{{ stream.id }}-{{ item.id }}"> 
+                {% if item.type == 3 %}
+                    <span class="glyphicon glyphicon-ok" title="Task"></span>
+                {% endif %}
+                {% if item.type == 2 %}
+                <span class="glyphicon glyphicon-fire" title="Bug"></span>
+                {% endif %}
+
+                {{ item.featureId }}/{{ item.name }} <br /> 
                 {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} <br />
                 {% if item.checklistitemcount > 0 %}
                    <span class="glyphicon glyphicon-list" title="{{ item.checklisttext }}"></span> {{ item.checklistitemcompleted }}/{{ item.checklistitemcount }} 
