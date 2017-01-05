@@ -179,6 +179,7 @@ def home():
         year=datetime.now().year,
     )
 
+
 @app.route('/contact')
 def contact():
     """Renders the contact page."""
@@ -199,11 +200,22 @@ def about():
         message='Your application description page.'
     )
 
+@app.route('/boards')
+def boards():
+    boards = model.Board.select().order_by(model.Board.name)
+    return render_template(
+        'boards.html',
+        title='Boards',
+        boards = boards)
+
 @app.route('/')
-@app.route('/project')
-def project():
-    """Renders the project page."""
-    streams = model.Stream.select().order_by(model.Stream.order_in_board)
+def slash():
+    return board(1)
+
+@app.route('/board/<board_id>')
+def board(board_id):
+    """Renders the board page."""
+    streams = model.Stream.select().where(model.Stream.parentboard==board_id).order_by(model.Stream.order_in_board)
     sdict = {}
     uiStreams = []
     for stream in streams:
@@ -211,7 +223,7 @@ def project():
         uiStreams.append(uistr)
 
     return render_template(
-        'project.html',
+        'board.html',
         title='Project',
         year=datetime.now().year,
         message='This is a project.',
@@ -220,6 +232,14 @@ def project():
         uis = uiStreams
 
     )
+
+@app.route('/new_board')
+def new_board():
+    return render_template('new_board.html')
+
+@app.route('/add_board')
+def add_board():
+    return boards()
 
 def get_current_user():
     return 2
