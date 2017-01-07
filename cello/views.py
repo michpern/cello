@@ -157,6 +157,42 @@ def update_checklist_items(item_id, form_data):
                 query = model.ChecklistItem.update(completed=0, lastupdated=get_date_time(datetime.utcnow()), lastupdatedby=get_current_user()).where(model.ChecklistItem.id == i.id)
                 query.execute()
 
+def create_standard_streams(board_id):
+    proposed = model.Stream()
+    proposed.parentboard = board_id
+    proposed.name="Proposed"
+    proposed.order_in_board = 1
+    proposed.allow_direct_add = 1
+    proposed.save()
+
+    backlog = model.Stream()
+    backlog.parentboard = board_id
+    backlog.name="Backlog"
+    backlog.order_in_board = 2
+    backlog.allow_direct_add = 1
+    backlog.save()
+
+    inprogress = model.Stream()
+    inprogress.parentboard = board_id
+    inprogress.name="In Progress"
+    inprogress.order_in_board = 3
+    inprogress.allow_direct_add = 1
+    inprogress.save()
+
+    completed = model.Stream()
+    completed.parentboard = board_id
+    completed.name="Completed"
+    completed.order_in_board = 4
+    completed.allow_direct_add = 0
+    completed.save()
+
+    notdone = model.Stream()
+    notdone.parentboard = board_id
+    notdone.name="Will Not Be Done"
+    notdone.order_in_board = 5
+    notdone.allow_direct_add = 0
+    notdone.save()
+
 
 app.jinja_env.filters['formatdatetime'] = format_date_time
 app.jinja_env.filters['getusername'] = get_user_name
@@ -216,6 +252,7 @@ def slash():
 def board(board_id):
     """Renders the board page."""
     streams = model.Stream.select().where(model.Stream.parentboard==board_id).order_by(model.Stream.order_in_board)
+    board = model.Board.get(model.Board.id==board_id)
     sdict = {}
     uiStreams = []
     for stream in streams:
@@ -224,9 +261,10 @@ def board(board_id):
 
     return render_template(
         'board.html',
-        title='Project',
+        board_name=board.name,
+        title='Board',
         year=datetime.now().year,
-        message='This is a project.',
+        message='This is a board.',
         streams=streams,
         sdict = sdict,
         uis = uiStreams
@@ -235,10 +273,50 @@ def board(board_id):
 
 @app.route('/new_board')
 def new_board():
-    return render_template('new_board.html')
 
-@app.route('/add_board')
-def add_board():
+    return render_template(
+        'edit_board.html',
+        name = '',
+        id = -1,
+        default_board=False,
+        is_private = False)
+
+@app.route('/edit_board/<board_id>')
+def edit_board(board_id):
+    board = model.Board.get(model.Board.id == board_id)
+    return render_template(
+        'edit_board.html',
+        name = board.name,
+        id = board_id,
+        default_board=False,
+        is_private = (board.isprivate == 1))
+
+@app.route('/save_board', methods=['POST'])
+def save_board():
+    data = request.form
+    id = data['board_id']
+    name = data['boardname']
+
+    if (id == '-1'):
+        parent = 1
+        new_board = model.Board()
+        new_board.name = name
+        new_board.parentproject = parent
+        new_board.gitstem = data['gitstem']
+        new_board.lastId = 1
+        if ('is_private' in data):
+            new_board.isprivate = 1
+        else:
+            new_board.isprivate = 0
+        new_board.createdby = get_current_user()
+        new_board.save()
+
+        create_standard_streams(new_board.id)
+    else:
+        board = model.Board.get(model.Board.id == id)
+        board.name = name
+        board.save()
+
     return boards()
 
 def get_current_user():
@@ -246,11 +324,11 @@ def get_current_user():
 
 def get_next_feature_id(parentStreamId):
     stream = model.Stream.get(model.Stream.id == parentStreamId)
-    project = model.Project.get(model.Project.id == stream.parentboard)
-    stem = project.gitstem
-    featureId = project.lastId
+    board = model.Board.get(model.Board.id == stream.parentboard)
+    stem = board.gitstem
+    featureId = board.lastId
     featureId = featureId + 1
-    query = model.Project.update(lastId = featureId).where(model.Project.id == project.id)
+    query = model.Board.update(lastId = featureId).where(model.Board.id == board.id)
     query.execute()
     return stem + "-" + str(featureId).zfill(3)
 

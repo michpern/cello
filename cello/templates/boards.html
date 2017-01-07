@@ -7,7 +7,7 @@
 <ul >
     {% for board in boards %}
         <li id="board-{{ board.id }}">
-            <a href="{{url_for('board', board_id=board.id)}}">{{board.name}}</a>
+            <a href="{{url_for('board', board_id=board.id)}}">{{board.name}}</a> <a href="{{url_for('edit_board', board_id=board.id)}}">Edit Board</a> 
         </li>
         
     {% endfor %}

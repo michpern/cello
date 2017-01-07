@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+
+<div id="board-form" title="Create New Board">
+    <form id="newboardform" method="post" action="{{url_for('save_board')}}">
+        <fieldset>
+            <input type="hidden" name="board_id" value="{{id}}" />
+            <label>Name<input type="text" name="boardname" id="boardname" class="text ui-widget-content ui-corner-all" value="{{name}}"/></label>
+            {% if default_board %}
+                <div><label>My default board <input type="checkbox" name="is_default" checked/></label></div>
+            {% else %}
+                <div><label>My default board <input type="checkbox"name="is_default" /></label></div>
+            {% endif %}
+            {% if id == -1 %}
+                <label>Git Feature Stem<input type="text" name="gitstem" class="text ui-widget-content ui-corner-all" value="" /></label>
+            {% endif %}
+            {% if is_private %}
+                <div><label>Private board <input type="checkbox" name="is_private" checked /></label></div>
+            {% else %}
+                <div><label>Private board <input type="checkbox" name="is_private" /></label></div>
+            {% endif %}
+            <input type="submit">
+</fieldset>
+    </form>
+</div>
+
+{% endblock %}

@@ -235,13 +235,14 @@
                 <ul class="nav navbar-nav">
 
                     <li><a href="{{ url_for('boards') }}">Boards</a></li>
-<!--                   <li><a href="{{ url_for('about') }}">About</a></li>
-                    <li><a href="{{ url_for('contact') }}">Contact</a></li> -->
+                    <!--                   <li><a href="{{ url_for('about') }}">About</a></li>
+                                    <li><a href="{{ url_for('contact') }}">Contact</a></li> -->
                 </ul>
+
+                <a href="#"  class="navbar-brand">{{board_name}}</a>
             </div>
         </div>
     </div>
-
     <div class="container body-content">
         {% block content %}{% endblock %}
         <hr />

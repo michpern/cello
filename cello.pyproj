@@ -46,7 +46,7 @@
     <Folder Include="cello\templates\partial\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="cello\templates\new_board.html" />
+    <Content Include="cello\templates\edit_board.html" />
     <Content Include="cello\templates\boards.html" />
     <Content Include="cello\templates\partial\stream.html" />
     <Content Include="cello\templates\board.html" />

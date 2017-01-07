@@ -12,7 +12,11 @@ class BaseModel(Model):
 class Board(BaseModel):
     name = TextField(null=True)
     parentproject = IntegerField(db_column='parentProject')
-
+    gitstem = TextField(null=True)    
+    lastId = IntegerField(db_column='lastId', null=True)
+    createdby = IntegerField(db_column='createdBy', null=True)
+    isprivate = IntegerField(db_column='isprivate', null=True)
+    team = IntegerField(db_column='team', null=True)
     class Meta:
         db_table = 'Board'
 
@@ -35,6 +39,7 @@ class Item(BaseModel):
     class Meta:
         db_table = 'Item'
 
+""" - Not used
 class Project(BaseModel):
     gitstem = TextField(null=True)
     name = TextField()
@@ -42,6 +47,7 @@ class Project(BaseModel):
 
     class Meta:
         db_table = 'Project'
+"""
 
 class Stream(BaseModel):
     name = TextField(null=True)
