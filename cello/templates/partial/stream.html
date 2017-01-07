@@ -9,6 +9,10 @@
                 {% if item.type == 2 %}
                 <span class="glyphicon glyphicon-fire" title="Bug"></span>
                 {% endif %}
+                {% if item.type == 4 %}
+                <span class="glyphicon glyphicon-user" title="User Story"></span>
+                {% endif %}
+
 
                 {{ item.featureId }}/{{ item.name }} <br /> 
                 {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} <br />
@@ -20,6 +24,9 @@
                 {% endif %}
                 {% if item.comments != "" %}
                     <span class="glyphicon glyphicon-comment" title="{{ item.comments }}"></span>
+                {% endif %}
+                {% if item.parentitemtext != "" %}
+                    <span class="glyphicon glyphicon-chevron-up" title="Parent: {{ item.parentitemtext }}"></span>
                 {% endif %}
             </li>
         {% endfor %}
@@ -44,7 +51,21 @@
                 $('#comments').html('');
                 $('#checklist').html('');
                 $('#itemtype').val(1);
-                dialog.dialog("open");
+                $.when(get_possible_parents(-1)).done(function (parents) {
+                    $('#parent-item')
+                         .find('option')
+                         .remove()
+                         .end()
+                         .append('<option value="-1">None</option>')                        
+
+                    possible_parents = JSON.parse(parents)
+                    for (var i = 0; i < possible_parents.length; i++) {
+                        var val = possible_parents[i];
+                        $('#parent-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#parent-item').val(-1)
+                    dialog.dialog("open");
+                });
             });
     </script>
 </li>

@@ -10,6 +10,10 @@ from cello import app, model
 import cello.model
 from builtins import print
 
+class uiIdValue:
+    def __init__(self, id, value):
+        self.id = id
+        self.value = value
 
 class uiStream:
     def __init__(self, id, name, allow_direct_add, items):
@@ -19,7 +23,7 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext):
         self.id = id
         self.type = type
         self.featureId = featureId
@@ -38,6 +42,7 @@ class uiItem:
             self.comments = ""
         else:
             self.comments = comments
+        self.parentitemtext = parentitemtext
 
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
@@ -129,7 +134,13 @@ def get_UI_stream(stream_id):
     for i in stream_items:
         checklisttotal, checklistitemcompleted, checklisttext = get_checklist_info(i.id)
         comments = get_comment_info(i.id)
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments)
+        if i.parentId is None or i.parentId == -1:
+            parentItem = ""
+        else:
+            parent = model.Item.get(model.Item.id == i.parentId)
+            parentItem = parent.featureId + "/" + parent.name
+
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 
@@ -340,6 +351,7 @@ def set_item_from_data(item, data):
     item.lastupdatedby = get_current_user()
     item.parentstream = data['parentStream']
     item.itemtype = int(data['itemtype'])
+    item.parentId = int(data['parent-item'])
     
 
 @app.route('/save_item', methods=['POST'])
@@ -351,7 +363,11 @@ def save_item():
         new_item = model.Item()
         new_item.created = get_date_time(datetime.utcnow())
         new_item.reportedby = get_current_user()
-        new_item.featureId = get_next_feature_id(data['parentStream'])
+        item_type = int(data['itemtype'])
+        if item_type == 1 or item_type == 2:
+            new_item.featureId = get_next_feature_id(data['parentStream'])
+        else:
+            new_item.featureId = ""
     else:
         new_item = model.Item.get(model.Item.id == item_id)
 
@@ -434,9 +450,26 @@ def get_item():
         checklist.append(uiChecklistItem(i.id, i.checklisttext, lu, lub, i.completed))
 
     d = model_to_dict(item)
+    if item.parentId is None:
+        d['parentId'] = -1
+
     d['lastupdated'] = format_date_time(d['lastupdated']) + " " + get_user_name(d['lastupdatedby'])
     d['comments'] = comments
     d['checklist'] = checklist
     retval = json.dumps(d, default=jdefault)
    
+    return retval
+
+@app.route('/get_potential_parents')
+def get_potential_parents():   
+    item_id = request.args.get("id")
+    parr =  []
+    potentials = model.Item.select().where(model.Item.id != item_id).order_by(model.Item.name)
+    for p in potentials:
+        id = p.id
+        name = p.featureId + "/" +  p.name
+        up = uiIdValue(id, name)
+        parr.append(up)
+
+    retval = json.dumps(parr, default=jdefault)
     return retval

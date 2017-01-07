@@ -36,6 +36,7 @@ class Item(BaseModel):
     orderInStream = IntegerField(db_column='orderInStream', null=True)
     itemtype = IntegerField(db_column='itemtype', null=True)
     featureId =  TextField(null=True)
+    parentId = IntegerField(db_column='parentId', null=True)
     class Meta:
         db_table = 'Item'
 

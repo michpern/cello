@@ -59,6 +59,23 @@
             });
         }
 
+        function get_possible_parents(item_id) {
+            return $.ajax({
+                url: "/get_potential_parents?id=" + item_id,
+                timeout: 30000,
+                type: "GET",
+
+                dataType: 'html',
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("An error has occurred making the request: " + errorThrown)
+                },
+                success: function (data) {
+                    var item = JSON.parse(data);
+                    return item;
+                }
+            });
+        }
+
         function saveitem() {
             var ps = $("#parentStream")
             streamId = ps.val()
@@ -129,8 +146,9 @@
             }).bind('dblclick', function (event) {
                 full_id = ($(event.target).attr('id'));
                 id = full_id.split("-")[2];
-                $.when(get_item(id)).done(function (data) {
-                    item = JSON.parse(data);
+                $.when(get_item(id), get_possible_parents(id)).done(function (data, parents) {
+//                $.when(get_item(id)).done(function (data) {
+                    item = JSON.parse(data[0]);
                     dialog = make_dialog(true)
                     form = dialog.find("form");
                     $("#parentStream").val(item.parentstream);
@@ -158,6 +176,20 @@
                         $('#checklist').append("<input type='checkbox' name='clic-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + "' " + checked + " class='checklistitem'>" + checklist[i].itemtext + "<br/>");
                         $('#checklist').append("<input type='hidden' name='clih-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + ">");
                     }
+
+                    $('#parent-item')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">None</option>')                        
+
+                    possible_parents = JSON.parse(parents[0])
+                    for (var i = 0; i < possible_parents.length; i++) {
+                        var val = possible_parents[i];
+                        $('#parent-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#parent-item').val(item.parentId)
+
                     dialog.dialog("open");
                 });
 
