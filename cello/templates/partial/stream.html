@@ -28,6 +28,10 @@
                 {% if item.parentitemtext != "" %}
                     <span class="glyphicon glyphicon-chevron-up" title="Parent: {{ item.parentitemtext }}"></span>
                 {% endif %}
+                {% if item.childitemtext != "" %}
+                    <span class="glyphicon glyphicon-chevron-down" title="Child Items:<br/>{{ item.childitemtext }}"></span>
+                {% endif %}
+
             </li>
         {% endfor %}
         

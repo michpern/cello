@@ -23,7 +23,7 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext):
         self.id = id
         self.type = type
         self.featureId = featureId
@@ -43,6 +43,7 @@ class uiItem:
         else:
             self.comments = comments
         self.parentitemtext = parentitemtext
+        self.childitemtext = childitemtext
 
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
@@ -140,7 +141,13 @@ def get_UI_stream(stream_id):
             parent = model.Item.get(model.Item.id == i.parentId)
             parentItem = parent.featureId + "/" + parent.name
 
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem)
+        childitemtext = ""
+        children = model.Item.select().where(model.Item.parentId == i.id)
+        for c in children:
+            child = c.featureId + "/" + c.name
+            childitemtext = childitemtext + child + "<br/>"
+
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 

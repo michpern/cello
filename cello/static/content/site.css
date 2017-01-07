@@ -7,6 +7,7 @@
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
+    max-width:none
 }
 
 
@@ -53,6 +54,8 @@ input[type="checkbox"].input-validation-error {
     display: inline-block;
     height: 100px;
     white-space: nowrap;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 .li-parent {
