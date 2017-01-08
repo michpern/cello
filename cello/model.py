@@ -1,13 +1,14 @@
 from peewee import *
-
-database = SqliteDatabase('c:/dev/tracker.db', **{})
+from cello import db
+# database = SqliteDatabase('c:/dev/tracker.db', **{})
 
 class UnknownField(object):
     def __init__(self, *_, **__): pass
 
-class BaseModel(Model):
-    class Meta:
+class BaseModel(db.Model):
+    """class Meta:
         database = database
+"""
 
 class Board(BaseModel):
     name = TextField(null=True)
@@ -59,13 +60,13 @@ class Stream(BaseModel):
     class Meta:
         db_table = 'Stream'
 
-class User(BaseModel):
+class UserPrefs(BaseModel):
     defaultboard = IntegerField(db_column='defaultBoard', null=True)
     name = TextField(null=True)
     username = TextField(null=True)
 
     class Meta:
-        db_table = 'User'
+        db_table = 'UserPrefs'
 
 class Comment(BaseModel):
     parentitem = IntegerField(db_column='parentItem')
@@ -85,6 +86,14 @@ class ChecklistItem(BaseModel):
 
     class Meta:
         db_table = 'ChecklistItem'
+
+class Team(BaseModel):
+    name = TextField(null=True)
+
+class TeamMembers(BaseModel):
+    teamId = IntegerField(db_column='teamId')
+    userId = IntegerField(db_column='userId')
+
 class SqliteSequence(BaseModel):
     name = UnknownField(null=True)  #
     seq = UnknownField(null=True)  #

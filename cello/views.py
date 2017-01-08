@@ -5,8 +5,9 @@ Routes and views for the flask application.
 from datetime import datetime
 import json
 from flask import render_template, request
+from flask_peewee.auth import Auth
 from playhouse.shortcuts import *
-from cello import app, model
+from cello import app, model, auth
 import cello.model
 from builtins import print
 
@@ -96,7 +97,7 @@ def get_user_name(u):
     if u is None:
         return ""
 
-    user = model.User.get(model.User.id == u)
+    user = model.UserPrefs.get(model.UserPrefs.id == u)
     return user.name
 
 def get_comment_info(item_id):
@@ -214,7 +215,8 @@ def create_standard_streams(board_id):
 
 app.jinja_env.filters['formatdatetime'] = format_date_time
 app.jinja_env.filters['getusername'] = get_user_name
-    
+
+"""    
 @app.before_request
 def before_request():
     model.database.connect()
@@ -223,6 +225,7 @@ def before_request():
 def after_request(response):
     model.database.close()
     return response
+"""
 
 @app.route('/home')
 def home():
@@ -254,17 +257,29 @@ def about():
         message='Your application description page.'
     )
 
+@auth.login_required
 @app.route('/boards')
 def boards():
-    boards = model.Board.select().order_by(model.Board.name)
+    currentuser = get_current_user()
+    privateboards = model.Board.select().where( (model.Board.createdby == currentuser) & (model.Board.isprivate==1)).order_by(model.Board.name)
+    myteams = get_users_teams(currentuser)
+    teamboards = model.Board.select().where(model.Board.team << myteams).order_by(model.Board.name)
+    otherboards = model.Board.select().where((~(model.Board.team << myteams)) & (model.Board.isprivate == 0)).order_by(model.Board.name)
     return render_template(
         'boards.html',
         title='Boards',
-        boards = boards)
+        privateboards = privateboards,
+        teamboards = teamboards,
+        otherboards = otherboards)
+
 
 @app.route('/')
+@auth.login_required
 def slash():
-    return board(1)
+    userId = get_current_user()
+    user = model.UserPrefs.get(model.UserPrefs.id == userId)
+    boardId = user.defaultboard
+    return board(boardId)
 
 @app.route('/board/<board_id>')
 def board(board_id):
@@ -302,6 +317,8 @@ def new_board():
 @app.route('/edit_board/<board_id>')
 def edit_board(board_id):
     board = model.Board.get(model.Board.id == board_id)
+    current_user = get_current_user()
+    teams = get_users_teams(current_user_user)
     return render_template(
         'edit_board.html',
         name = board.name,
@@ -338,7 +355,12 @@ def save_board():
     return boards()
 
 def get_current_user():
-    return 2
+    user = auth.get_logged_in_user()
+    return user.id
+    
+def get_users_teams(userId):
+    teams = model.TeamMembers.select(fn.Distinct(model.TeamMembers.teamId)).where(model.TeamMembers.userId == userId)
+    return teams
 
 def get_next_feature_id(parentStreamId):
     stream = model.Stream.get(model.Stream.id == parentStreamId)

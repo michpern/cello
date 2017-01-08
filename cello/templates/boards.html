@@ -4,14 +4,36 @@
 
 <h2>{{ title }}.</h2>
 
+<h2>My Private Boards</h2>
 <ul >
-    {% for board in boards %}
+    {% for board in privateboards %}
         <li id="board-{{ board.id }}">
             <a href="{{url_for('board', board_id=board.id)}}">{{board.name}}</a> <a href="{{url_for('edit_board', board_id=board.id)}}">Edit Board</a> 
         </li>
         
     {% endfor %}
 </ul>
+
+<h2>My Team Boards</h2>
+<ul>
+    {% for board in teamboards %}
+    <li id="board-{{ board.id }}">
+        <a href="{{url_for('board', board_id=board.id)}}">{{board.name}}</a> <a href="{{url_for('edit_board', board_id=board.id)}}">Edit Board</a>
+    </li>
+
+    {% endfor %}
+</ul>
+
+<h2>Public Boards</h2>
+<ul>
+    {% for board in otherboards %}
+    <li id="board-{{ board.id }}">
+        <a href="{{url_for('board', board_id=board.id)}}">{{board.name}}</a> <a href="{{url_for('edit_board', board_id=board.id)}}">Edit Board</a>
+    </li>
+
+    {% endfor %}
+</ul>
+
 
 <a href="{{url_for('new_board')}}">New Board</a>
 {% endblock %}
