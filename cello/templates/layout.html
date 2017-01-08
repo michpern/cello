@@ -10,10 +10,11 @@
     <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
     <style>
+/*
         label, input {
             display: block;
         }
-
+*/
             input.text {
                 margin-bottom: 12px;
                 width: 95%;
@@ -163,6 +164,9 @@
                     $('#itemtype').val(item.itemtype);
                     comments = item.comments;
                     num_comments = comments.length;
+                    if (num_comments > 0) {
+                       $('#comments').append("<b>Comments</b><br>")
+                    }
                     for (var i =0; i<num_comments; i++) {
                         $('#comments').append("<div class='comment'>" + comments[i].comment + " " + comments[i].lastupdatedby + " " + comments[i].lastupdated+ "</div>");
                     }
@@ -173,7 +177,7 @@
                         if (checklist[i].completed == 1) {
                             checked = "checked"
                         }
-                        $('#checklist').append("<input type='checkbox' name='clic-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + "' " + checked + " class='checklistitem'>" + checklist[i].itemtext + "<br/>");
+                        $('#checklist').append("<div><label><input type='checkbox' name='clic-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + "' " + checked + ">"  + checklist[i].itemtext +  "</label></div>");
                         $('#checklist').append("<input type='hidden' name='clih-" + item.id + "-" + checklist[i].id + "' id='" + item.id + "-" + checklist[i].id + ">");
                     }
 

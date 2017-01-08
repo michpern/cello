@@ -35,9 +35,12 @@
             </li>
         {% endfor %}
         
-        <li class="cancel_drag">
+        
             {% if stream.allow_direct_add == 1 %}
+        <li class="cancel_drag stream_button" id="stream_button">
             <button id="create-item-{{ stream.id }}">Create new item</button>
+            {% else %}
+        <li class="cancel_drag">
             {% endif %}
         </li>
     </ul>
