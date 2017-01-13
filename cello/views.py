@@ -504,6 +504,7 @@ def save_item():
 
     return render_template(
         'partial/stream.html',
+         can_edit = True,
         stream=uistr
     )
 @app.route('/move_item')
@@ -532,6 +533,7 @@ def move_item():
     uistr = get_UI_stream(parent_id, True)
     return render_template(
         'partial/stream.html',
+        can_edit = True,
         stream=uistr
     )
 
