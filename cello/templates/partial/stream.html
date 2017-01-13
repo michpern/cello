@@ -1,6 +1,11 @@
-﻿<li class="li-parent" id="stream-{{ stream.id }}">
+﻿{% if can_edit %}
+   {% set ulid="items" %}
+{% else %}
+   {% set ulid = "roitems" %}
+{% endif %}
+<li class="li-parent" id="stream-{{ stream.id }}">
     {{ stream.name }}
-    <ul class="ui-sortable" id="items">
+    <ul class="ui-sortable" id="{{ ulid }}">
         {% for item in stream.items %}
             <li id="item-{{ stream.id }}-{{ item.id }}"> 
                 {% if item.type == 3 %}
@@ -44,6 +49,7 @@
             {% endif %}
         </li>
     </ul>
+    {% if can_edit %}
     
     <script>
             $("#create-item-{{ stream.id }}").button().on("click", function () {
@@ -75,4 +81,6 @@
                 });
             });
     </script>
+    {% endif %}
+
 </li>

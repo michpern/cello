@@ -97,6 +97,19 @@ li > #items > li {
     white-space: normal;
 }
 
+li > #roitems > li {
+ 	margin: 10px 0px;
+    background: lightgrey;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #555;	
+    box-shadow: 1px 1px 2px lightgrey;
+    white-space: normal;
+}
+
 .cancel_drag {
     display: none;
 }

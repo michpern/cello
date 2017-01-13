@@ -4,12 +4,28 @@ Routes and views for the flask application.
 
 from datetime import datetime
 import json
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from flask_peewee.auth import Auth
 from playhouse.shortcuts import *
 from cello import app, model, auth
 import cello.model
 from builtins import print
+
+
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
 
 class uiIdValue:
     def __init__(self, id, value):
@@ -17,10 +33,11 @@ class uiIdValue:
         self.value = value
 
 class uiStream:
-    def __init__(self, id, name, allow_direct_add, items):
+    def __init__(self, id, name, allow_direct_add, can_edit, items):
         self.id = id
         self.name = name
-        self.allow_direct_add = allow_direct_add
+        self.allow_direct_add = (allow_direct_add and can_edit)
+        self.can_edit = can_edit
         self.items = items
 
 class uiItem:
@@ -129,7 +146,7 @@ def get_checklist_info(item_id):
 
     return total,completed, text
 
-def get_UI_stream(stream_id):
+def get_UI_stream(stream_id, canEdit):
     stream = model.Stream.get(model.Stream.id == stream_id)
     stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
     si = []
@@ -154,8 +171,35 @@ def get_UI_stream(stream_id):
     print ("Stream: " + stream.name ) 
 
     print (si)   
-    uistr = uiStream(stream.id, stream.name, stream.allow_direct_add, si)
+    uistr = uiStream(stream.id, stream.name, stream.allow_direct_add, canEdit, si)
     return uistr
+
+def get_UI_teams(current_user):
+    teamIds = get_users_teams(current_user) 
+    teams = model.Team.select().where(model.Team.id  << teamIds).order_by(model.Team.name)
+
+    uiTeams = []
+    private = uiIdValue(-1, "Private Board")
+    uiTeams.append(private)
+    for team in teams:
+        id = team.id
+        value = team.name
+        t = uiIdValue(id, value)
+        uiTeams.append(t)
+
+    return uiTeams
+
+def can_user_edit_board(board, current_user, uiTeams):
+    canEdit = False
+    if board.createdby == current_user:
+        canEdit = True
+    else:
+        for team in uiTeams:
+            if team.id == board.team:
+                canEdit = True
+                break
+
+    return canEdit
 
 def update_checklist_items(item_id, form_data):
     dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id).order_by(model.ChecklistItem.lastupdated.desc())
@@ -226,6 +270,11 @@ def after_request(response):
     model.database.close()
     return response
 """
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 @app.route('/home')
 def home():
@@ -264,10 +313,11 @@ def boards():
     privateboards = model.Board.select().where( (model.Board.createdby == currentuser) & (model.Board.isprivate==1)).order_by(model.Board.name)
     myteams = get_users_teams(currentuser)
     teamboards = model.Board.select().where(model.Board.team << myteams).order_by(model.Board.name)
-    otherboards = model.Board.select().where((~(model.Board.team << myteams)) & (model.Board.isprivate == 0)).order_by(model.Board.name)
+    otherboards = model.Board.select().where((~(model.Board.team << myteams)) & (model.Board.isprivate == 0) & (model.Board.createdby != currentuser)).order_by(model.Board.name)
     return render_template(
         'boards.html',
         title='Boards',
+        currentuser = currentuser,
         privateboards = privateboards,
         teamboards = teamboards,
         otherboards = otherboards)
@@ -286,10 +336,15 @@ def board(board_id):
     """Renders the board page."""
     streams = model.Stream.select().where(model.Stream.parentboard==board_id).order_by(model.Stream.order_in_board)
     board = model.Board.get(model.Board.id==board_id)
+
+    current_user = get_current_user()
+    uiTeams = get_UI_teams(current_user)
+    canEdit = can_user_edit_board(board, current_user, uiTeams)
+
     sdict = {}
     uiStreams = []
     for stream in streams:
-        uistr = get_UI_stream(stream.id)
+        uistr = get_UI_stream(stream.id, canEdit)
         uiStreams.append(uistr)
 
     return render_template(
@@ -298,6 +353,7 @@ def board(board_id):
         title='Board',
         year=datetime.now().year,
         message='This is a board.',
+        can_edit = canEdit,
         streams=streams,
         sdict = sdict,
         uis = uiStreams
@@ -306,24 +362,34 @@ def board(board_id):
 
 @app.route('/new_board')
 def new_board():
+    current_user = get_current_user()
+    uiTeams = get_UI_teams(current_user)
 
     return render_template(
         'edit_board.html',
         name = '',
+        currentteam = -1,
         id = -1,
         default_board=False,
+        teams = uiTeams,
         is_private = False)
 
 @app.route('/edit_board/<board_id>')
 def edit_board(board_id):
     board = model.Board.get(model.Board.id == board_id)
     current_user = get_current_user()
-    teams = get_users_teams(current_user_user)
+    uiTeams = get_UI_teams(current_user)
+    canEdit = can_user_edit_board(board, current_user, uiTeams)
+    if canEdit == False:
+        raise InvalidUsage('You cannot edit this board', status_code=403)
+
     return render_template(
         'edit_board.html',
         name = board.name,
+        currentteam = board.team,
         id = board_id,
         default_board=False,
+        teams = uiTeams,
         is_private = (board.isprivate == 1))
 
 @app.route('/save_board', methods=['POST'])
@@ -331,6 +397,9 @@ def save_board():
     data = request.form
     id = data['board_id']
     name = data['boardname']
+    teamid = data['team']
+    if teamid == -1:
+        teamid = None
 
     if (id == '-1'):
         parent = 1
@@ -339,6 +408,7 @@ def save_board():
         new_board.parentproject = parent
         new_board.gitstem = data['gitstem']
         new_board.lastId = 1
+        new_board.team = teamid
         if ('is_private' in data):
             new_board.isprivate = 1
         else:
@@ -349,7 +419,14 @@ def save_board():
         create_standard_streams(new_board.id)
     else:
         board = model.Board.get(model.Board.id == id)
+        current_user = get_current_user()
+        uiTeams = get_UI_teams(current_user)
+        canEdit = can_user_edit_board(board, current_user, uiTeams)
+        if canEdit == False:
+            raise InvalidUsage('You cannot edit this board', status_code=403)
+
         board.name = name
+        board.team = teamid
         board.save()
 
     return boards()
@@ -359,7 +436,7 @@ def get_current_user():
     return user.id
     
 def get_users_teams(userId):
-    teams = model.TeamMembers.select(fn.Distinct(model.TeamMembers.teamId)).where(model.TeamMembers.userId == userId)
+    teams = model.TeamMembers.select(fn.Distinct(model.TeamMembers.teamId)).where(model.TeamMembers.userId == userId)    
     return teams
 
 def get_next_feature_id(parentStreamId):
@@ -423,7 +500,7 @@ def save_item():
     update_checklist_items(item_id, data)
 
     stream_id = data['parentStream']
-    uistr = get_UI_stream(stream_id)
+    uistr = get_UI_stream(stream_id, True)
 
     return render_template(
         'partial/stream.html',
@@ -452,7 +529,7 @@ def move_item():
     query = model.Item.update(parentstream=parent_id, orderInStream=new_pos, lastupdated=lud, lastupdatedby=ludb).where(model.Item.id == item_id)
     query.execute()
 
-    uistr = get_UI_stream(parent_id)
+    uistr = get_UI_stream(parent_id, True)
     return render_template(
         'partial/stream.html',
         stream=uistr
@@ -492,6 +569,8 @@ def get_item():
 @app.route('/get_potential_parents')
 def get_potential_parents():   
     item_id = request.args.get("id")
+    item = model.Item.get(model.Item.id == item_id)
+    
     parr =  []
     potentials = model.Item.select().where(model.Item.id != item_id).order_by(model.Item.name)
     for p in potentials:

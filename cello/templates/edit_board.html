@@ -23,9 +23,13 @@
                 <div><label>Private board <input type="checkbox" name="is_private" /></label></div>
             {% endif %}
             <label>Team
-            <select name="team" id="team">
+            <select name="team" id="team">                
                 {% for team in teams %}
-                   <option id="{{team.id}}">{{team.name}}</option>
+                   {% if currentteam == team.id %}                      
+                    <option value="{{team.id}}" selected >{{team.value}}</option>
+                   {% else %}
+                    <option value="{{team.id}}">{{team.value}}</option>
+                   {% endif %}
                 {% endfor %}
             </select>
             </label>
