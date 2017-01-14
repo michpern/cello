@@ -25,22 +25,22 @@
         var dialog, form;
         function move_item(old_pos, new_pos, new_parent) {
             $.ajax({
-                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent,                   //
-                timeout: 30000,
-                type: "GET",
+                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent + "&item_filter={{filter_tag}}",                   //
+                    timeout: 30000,
+                    type: "GET",
 
-                dataType: 'html',
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert("An error has occurred making the request: " + errorThrown)
-                },
-                success: function (data) {
-                    sid = '#' + new_parent
-                    stream_li = $(sid);
-                    stream_li.replaceWith(data);
-                    set_item_handlers();
-                    return true
-                }
-            });
+                    dataType: 'html',
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("An error has occurred making the request: " + errorThrown)
+                    },
+                    success: function (data) {
+                        sid = '#' + new_parent
+                        stream_li = $(sid);
+                        stream_li.replaceWith(data);
+                        set_item_handlers();
+                        return true
+                    }
+                });
         }
 
         function get_item(item_id) {
@@ -243,6 +243,11 @@
             set_item_handlers();
         })
 
+        $(function () {
+            $('#item-select-filter').change(function () {
+                window.location = "/board/{{board_id}}/" + $(this).val();
+            });
+        });
 
     }
 
@@ -255,6 +260,7 @@
             }
         });
     });
+
     </script>
 </head>
 
@@ -281,7 +287,14 @@
 
                 <a href="#"  class="navbar-brand">{{board_name}}</a>
                 <a href="{{ url_for('auth.logout') }}" class="navbar-brand">Logout</a>
-                <select><option value="all">All Items</option><option>My items</option></select>
+                {% if filter_tag == 'all' %}
+                  {% set asel='selected' %}
+                  {% set msel='' %}
+                {% else %}
+                  {% set asel='' %}
+                  {% set msel='selected' %}
+                {% endif %}
+                <select id="item-select-filter"><option value="all" {{asel}}>All Items</option><option value="mine" {{msel}}>My items</option></select>
             </div>
         </div>
     </div>

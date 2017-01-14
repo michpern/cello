@@ -146,11 +146,17 @@ def get_checklist_info(item_id):
 
     return total,completed, text
 
-def get_UI_stream(stream_id, canEdit):
+def get_UI_stream(stream_id, canEdit, filter_tag):
     stream = model.Stream.get(model.Stream.id == stream_id)
-    stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
+    if filter_tag == 'all':
+        stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
+    else:
+        cu = get_current_user()
+        stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == cu)).order_by(model.Item.orderInStream)
+
     si = []
     for i in stream_items:
+
         checklisttotal, checklistitemcompleted, checklisttext = get_checklist_info(i.id)
         comments = get_comment_info(i.id)
         if i.parentId is None or i.parentId == -1:
@@ -329,10 +335,11 @@ def slash():
     userId = get_current_user()
     user = model.UserPrefs.get(model.UserPrefs.id == userId)
     boardId = user.defaultboard
-    return board(boardId)
+    return board(boardId, "all")
 
 @app.route('/board/<board_id>')
-def board(board_id):
+@app.route('/board/<board_id>/<filter_tag>')
+def board(board_id, filter_tag='all'):
     """Renders the board page."""
     streams = model.Stream.select().where(model.Stream.parentboard==board_id).order_by(model.Stream.order_in_board)
     board = model.Board.get(model.Board.id==board_id)
@@ -344,16 +351,18 @@ def board(board_id):
     sdict = {}
     uiStreams = []
     for stream in streams:
-        uistr = get_UI_stream(stream.id, canEdit)
+        uistr = get_UI_stream(stream.id, canEdit, filter_tag)
         uiStreams.append(uistr)
 
     return render_template(
         'board.html',
         board_name=board.name,
+        board_id = board_id,
         title='Board',
         year=datetime.now().year,
         message='This is a board.',
         can_edit = canEdit,
+        filter_tag = filter_tag,
         streams=streams,
         sdict = sdict,
         uis = uiStreams
@@ -500,7 +509,8 @@ def save_item():
     update_checklist_items(item_id, data)
 
     stream_id = data['parentStream']
-    uistr = get_UI_stream(stream_id, True)
+    item_filter = data['item_filter']
+    uistr = get_UI_stream(stream_id, True, item_filter)
 
     return render_template(
         'partial/stream.html',
@@ -515,6 +525,7 @@ def move_item():
     new_pos = request.args.get("new_pos")
     # stream-4
     parent = request.args.get("new_parent")
+    filter_tag = request.args.get("item_filter")
 
     old_parts = old_pos.split("-")
     item_id = old_parts[2]
@@ -530,7 +541,7 @@ def move_item():
     query = model.Item.update(parentstream=parent_id, orderInStream=new_pos, lastupdated=lud, lastupdatedby=ludb).where(model.Item.id == item_id)
     query.execute()
 
-    uistr = get_UI_stream(parent_id, True)
+    uistr = get_UI_stream(parent_id, True, filter_tag)
     return render_template(
         'partial/stream.html',
         can_edit = True,
