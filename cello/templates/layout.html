@@ -287,14 +287,26 @@
 
                 <a href="#"  class="navbar-brand">{{board_name}}</a>
                 <a href="{{ url_for('auth.logout') }}" class="navbar-brand">Logout</a>
+                {% set asel='' %}
+                {% set msel='' %}
                 {% if filter_tag == 'all' %}
                   {% set asel='selected' %}
-                  {% set msel='' %}
-                {% else %}
-                  {% set asel='' %}
+                {% endif %}
+                {% if filter_tag == 'mine' %}
                   {% set msel='selected' %}
                 {% endif %}
-                <select id="item-select-filter"><option value="all" {{asel}}>All Items</option><option value="mine" {{msel}}>My items</option></select>
+                <select id="item-select-filter">
+                    <option value="all" {{asel}}>All Items</option>
+                    <option value="mine" {{msel}}>My items</option>
+                    {% for u in team_users %}
+                       {% if u.id == filter_tag|int() %}
+                           {% set sel = "selected" %}
+                       {% else %}
+                           {% set sel = "" %}
+                       {% endif %}
+                    <option value="{{u.id}}" {{sel}}>{{u.value}}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
     </div>

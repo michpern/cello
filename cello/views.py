@@ -150,9 +150,11 @@ def get_UI_stream(stream_id, canEdit, filter_tag):
     stream = model.Stream.get(model.Stream.id == stream_id)
     if filter_tag == 'all':
         stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
-    else:
+    elif filter_tag == 'mine':
         cu = get_current_user()
         stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == cu)).order_by(model.Item.orderInStream)
+    else:        
+        stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == filter_tag)).order_by(model.Item.orderInStream)
 
     si = []
     for i in stream_items:
@@ -335,7 +337,7 @@ def slash():
     userId = get_current_user()
     user = model.UserPrefs.get(model.UserPrefs.id == userId)
     boardId = user.defaultboard
-    return board(boardId, "all")
+    return board(boardId, "2")
 
 @app.route('/board/<board_id>')
 @app.route('/board/<board_id>/<filter_tag>')
@@ -347,6 +349,12 @@ def board(board_id, filter_tag='all'):
     current_user = get_current_user()
     uiTeams = get_UI_teams(current_user)
     canEdit = can_user_edit_board(board, current_user, uiTeams)
+    team_user_ids = model.TeamMembers.select().where(model.TeamMembers.teamId == board.team)
+    uiTeamUsers = []
+    for tid in team_user_ids:
+        user = model.UserPrefs.get(model.UserPrefs.id == tid.userId)
+        uname = uiIdValue(user.id, user.name)
+        uiTeamUsers.append(uname)
 
     sdict = {}
     uiStreams = []
@@ -364,6 +372,7 @@ def board(board_id, filter_tag='all'):
         can_edit = canEdit,
         filter_tag = filter_tag,
         streams=streams,
+        team_users = uiTeamUsers,
         sdict = sdict,
         uis = uiStreams
 
