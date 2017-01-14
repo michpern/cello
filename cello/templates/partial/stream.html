@@ -64,7 +64,7 @@
                 $('#comments').html('');
                 $('#checklist').html('');
                 $('#itemtype').val(1);
-                $.when(get_possible_parents(-1)).done(function (parents) {
+                $.when(get_possible_parents(-1, {{ stream.id }})).done(function (parents) {
                     $('#parent-item')
                          .find('option')
                          .remove()

@@ -60,9 +60,9 @@
             });
         }
 
-        function get_possible_parents(item_id) {
+        function get_possible_parents(item_id, stream_id) {
             return $.ajax({
-                url: "/get_potential_parents?id=" + item_id,
+                url: "/get_potential_parents?id=" + item_id + "&sid=" + stream_id,
                 timeout: 30000,
                 type: "GET",
 
@@ -146,8 +146,11 @@
                 }
             }).bind('dblclick', function (event) {
                 full_id = ($(event.target).attr('id'));
-                id = full_id.split("-")[2];
-                $.when(get_item(id), get_possible_parents(id)).done(function (data, parents) {
+                parts = full_id.split("-");
+                id = parts[2];
+                stream_id = parts[1];
+                
+                $.when(get_item(id), get_possible_parents(id, stream_id)).done(function (data, parents) {
 //                $.when(get_item(id)).done(function (data) {
                     item = JSON.parse(data[0]);
                     dialog = make_dialog(true)
@@ -277,7 +280,8 @@
                 </ul>
 
                 <a href="#"  class="navbar-brand">{{board_name}}</a>
-                <a href="{{ url_for('auth.logout') }}">Logout</a>
+                <a href="{{ url_for('auth.logout') }}" class="navbar-brand">Logout</a>
+                <select><option value="all">All Items</option><option>My items</option></select>
             </div>
         </div>
     </div>
