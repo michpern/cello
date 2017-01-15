@@ -118,3 +118,21 @@ li > #items > #stream_button {
     display:inline;
     background: #A6D294; 
 }
+
+.card-people-container {
+}
+
+.card-last-updated {
+  font-size: 10px;
+  display: block;
+  float:left;
+  width: 75%;
+}
+
+.card-assigned-to {
+  font-size: 10px;
+  display: block;
+  float:right;
+  width: 25%;
+  color: blueviolet;
+}

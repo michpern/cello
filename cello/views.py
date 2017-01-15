@@ -41,13 +41,18 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext):
         self.id = id
         self.type = type
         self.featureId = featureId
         self.name = name
         self.lastupdated = lastupdated
         self.lastupdatedby = lastupdatedby
+        if assignedto is None:
+            self.assignedto = -1
+        else:
+            self.assignedto = assignedto
+
         self.checklistitemcount = checklistitemcount
         self.checklistitemcompleted = checklistitemcompleted
         self.checklisttext = checklisttext
@@ -111,7 +116,7 @@ def get_date_time(dt):
     return res
 
 def get_user_name(u):
-    if u is None:
+    if u is None or u == -1:
         return ""
 
     user = model.UserPrefs.get(model.UserPrefs.id == u)
@@ -173,7 +178,7 @@ def get_UI_stream(stream_id, canEdit, filter_tag):
             child = c.featureId + "/" + c.name
             childitemtext = childitemtext + child + "<br/>"
 
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext)
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 
@@ -196,6 +201,16 @@ def get_UI_teams(current_user):
         uiTeams.append(t)
 
     return uiTeams
+
+def get_ui_team_members(team_id):
+    team_user_ids = model.TeamMembers.select().where(model.TeamMembers.teamId == team_id)
+    uiTeamUsers = []
+    for tid in team_user_ids:
+        user = model.UserPrefs.get(model.UserPrefs.id == tid.userId)
+        uname = uiIdValue(user.id, user.name)
+        uiTeamUsers.append(uname)
+
+    return uiTeamUsers
 
 def can_user_edit_board(board, current_user, uiTeams):
     canEdit = False
@@ -234,6 +249,7 @@ def create_standard_streams(board_id):
     proposed.name="Proposed"
     proposed.order_in_board = 1
     proposed.allow_direct_add = 1
+    proposed.stream_type = 1
     proposed.save()
 
     backlog = model.Stream()
@@ -241,6 +257,7 @@ def create_standard_streams(board_id):
     backlog.name="Backlog"
     backlog.order_in_board = 2
     backlog.allow_direct_add = 1
+    backlog.stream_type = 2
     backlog.save()
 
     inprogress = model.Stream()
@@ -248,6 +265,7 @@ def create_standard_streams(board_id):
     inprogress.name="In Progress"
     inprogress.order_in_board = 3
     inprogress.allow_direct_add = 1
+    inprogress.stream_type = 3
     inprogress.save()
 
     completed = model.Stream()
@@ -255,6 +273,7 @@ def create_standard_streams(board_id):
     completed.name="Completed"
     completed.order_in_board = 4
     completed.allow_direct_add = 0
+    completed.stream_type = 4
     completed.save()
 
     notdone = model.Stream()
@@ -262,6 +281,7 @@ def create_standard_streams(board_id):
     notdone.name="Will Not Be Done"
     notdone.order_in_board = 5
     notdone.allow_direct_add = 0
+    notdone.stream_type = 5
     notdone.save()
 
 
@@ -337,7 +357,7 @@ def slash():
     userId = get_current_user()
     user = model.UserPrefs.get(model.UserPrefs.id == userId)
     boardId = user.defaultboard
-    return board(boardId, "2")
+    return board(boardId)
 
 @app.route('/board/<board_id>')
 @app.route('/board/<board_id>/<filter_tag>')
@@ -349,12 +369,7 @@ def board(board_id, filter_tag='all'):
     current_user = get_current_user()
     uiTeams = get_UI_teams(current_user)
     canEdit = can_user_edit_board(board, current_user, uiTeams)
-    team_user_ids = model.TeamMembers.select().where(model.TeamMembers.teamId == board.team)
-    uiTeamUsers = []
-    for tid in team_user_ids:
-        user = model.UserPrefs.get(model.UserPrefs.id == tid.userId)
-        uname = uiIdValue(user.id, user.name)
-        uiTeamUsers.append(uname)
+    ui_team_users = get_ui_team_members(board.team)
 
     sdict = {}
     uiStreams = []
@@ -372,7 +387,7 @@ def board(board_id, filter_tag='all'):
         can_edit = canEdit,
         filter_tag = filter_tag,
         streams=streams,
-        team_users = uiTeamUsers,
+        team_users = ui_team_users,
         sdict = sdict,
         uis = uiStreams
 
@@ -476,6 +491,7 @@ def set_item_from_data(item, data):
     item.parentstream = data['parentStream']
     item.itemtype = int(data['itemtype'])
     item.parentId = int(data['parent-item'])
+    item.assignedto = int(data['assigned-to'])
     
 
 @app.route('/save_item', methods=['POST'])
@@ -550,6 +566,13 @@ def move_item():
     query = model.Item.update(parentstream=parent_id, orderInStream=new_pos, lastupdated=lud, lastupdatedby=ludb).where(model.Item.id == item_id)
     query.execute()
 
+    item = model.Item.get(model.Item.id == item_id)
+    parent = model.Stream.get(model.Stream.id == parent_id)
+
+    if item.assignedto is None and parent.stream_type == 3:      # TODO fix 3 == inprogress
+        query = model.Item.update(assignedto=ludb).where(model.Item.id == item_id)
+        query.execute()
+
     uistr = get_UI_stream(parent_id, True, filter_tag)
     return render_template(
         'partial/stream.html',
@@ -582,6 +605,9 @@ def get_item():
         d['parentId'] = -1
 
     d['lastupdated'] = format_date_time(d['lastupdated']) + " " + get_user_name(d['lastupdatedby'])
+    if item.assignedto is None:
+        d['assignedto'] = -1;
+
     d['comments'] = comments
     d['checklist'] = checklist
     retval = json.dumps(d, default=jdefault)
@@ -605,4 +631,12 @@ def get_potential_parents():
         parr.append(up)
 
     retval = json.dumps(parr, default=jdefault)
+    return retval
+
+@app.route('/get_team_members_from_stream')
+def get_team_from_stream():
+    stream_id = request.args.get("sid")
+    stream = model.Stream.get(model.Stream.id == stream_id)
+    team = get_ui_team_members(stream.parentboard)
+    retval = json.dumps(team, default=jdefault)
     return retval

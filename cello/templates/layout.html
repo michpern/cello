@@ -77,6 +77,23 @@
             });
         }
 
+        function get_team_members(stream_id) {
+            return $.ajax({
+                url: "/get_team_members_from_stream?sid=" + stream_id,
+                timeout: 30000,
+                type: "GET",
+
+                dataType: 'html',
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("An error has occurred making the request: " + errorThrown)
+                },
+                success: function (data) {
+                    var item = JSON.parse(data);
+                    return item;
+                }
+            });
+        }
+
         function saveitem() {
             var ps = $("#parentStream")
             streamId = ps.val()
@@ -150,7 +167,7 @@
                 id = parts[2];
                 stream_id = parts[1];
                 
-                $.when(get_item(id), get_possible_parents(id, stream_id)).done(function (data, parents) {
+                $.when(get_item(id), get_possible_parents(id, stream_id), get_team_members(stream_id)).done(function (data, parents, team) {
 //                $.when(get_item(id)).done(function (data) {
                     item = JSON.parse(data[0]);
                     dialog = make_dialog(true)
@@ -196,6 +213,19 @@
                         $('#parent-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
                     }
                     $('#parent-item').val(item.parentId)
+
+                    $('#assigned-to')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">Not Assigned</option>')                        
+                    
+                    team_members = JSON.parse(team[0])
+                    for (var i = 0; i < team_members.length; i++) {
+                        var val = team_members[i];
+                        $('#assigned-to').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#assigned-to').val(item.assignedto)
 
                     dialog.dialog("open");
                 });

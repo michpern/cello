@@ -20,7 +20,10 @@
 
 
                 {{ item.featureId }}/{{ item.name }} <br /> 
-                {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} <br />
+                <div class="card-people-container">
+                    <span class="card-last-updated"> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
+                </div>
+                <br />
                 {% if item.checklistitemcount > 0 %}
                    <span class="glyphicon glyphicon-list" title="{{ item.checklisttext }}"></span> {{ item.checklistitemcompleted }}/{{ item.checklistitemcount }} 
                 {% endif %}
@@ -64,19 +67,33 @@
                 $('#comments').html('');
                 $('#checklist').html('');
                 $('#itemtype').val(1);
-                $.when(get_possible_parents(-1, {{ stream.id }})).done(function (parents) {
+                $.when(get_possible_parents(-1, {{ stream.id }}), get_team_members({{ stream.id }})).done(function (parents, team) {
                     $('#parent-item')
                          .find('option')
                          .remove()
                          .end()
                          .append('<option value="-1">None</option>')                        
 
-                    possible_parents = JSON.parse(parents)
+                    possible_parents = JSON.parse(parents[0])
                     for (var i = 0; i < possible_parents.length; i++) {
                         var val = possible_parents[i];
                         $('#parent-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
                     }
                     $('#parent-item').val(-1)
+
+                    $('#assigned-to')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">Not Assigned</option>')                        
+                    
+                    team_members = JSON.parse(team[0])
+                    for (var i = 0; i < team_members.length; i++) {
+                        var val = team_members[i];
+                        $('#assigned-to').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#assigned-to').val(-1)
+
                     dialog.dialog("open");
                 });
             });
