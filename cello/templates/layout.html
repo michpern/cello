@@ -25,7 +25,7 @@
         var dialog, form;
         function move_item(old_pos, new_pos, new_parent) {
             $.ajax({
-                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent + "&item_filter={{filter_tag}}",                   //
+                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent + "&item_filter={{filter_tag}}&sort_order={{sort_order}}",                   //
                     timeout: 30000,
                     type: "GET",
 
@@ -276,10 +276,15 @@
 
         $(function () {
             $('#item-select-filter').change(function () {
-                window.location = "/board/{{board_id}}/" + $(this).val();
+                window.location = "/board/{{board_id}}/" + $(this).val() + '/' + $('#item-sort-order').val();
             });
         });
 
+        $(function () {
+            $('#item-sort-order').change(function () {
+                window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val();
+            });
+        });
     }
 
     binder();
@@ -337,6 +342,26 @@
                        {% endif %}
                     <option value="{{u.id}}" {{sel}}>{{u.value}}</option>
                     {% endfor %}
+                </select>
+                <select id="item-sort-order">
+                    {% if 1 == sort_order|int() %}
+                    {% set sel = "selected" %}
+                    {% else %}
+                    {% set sel = "" %}
+                    {% endif %}
+                    <option value="1" {{sel}}>Priority, Last updated</option>
+                    {% if 2 == sort_order|int() %}
+                    {% set sel = "selected" %}
+                    {% else %}
+                    {% set sel = "" %}
+                    {% endif %}
+                    <option value="2" {{sel}}>Priority, Assigned to</option>
+                    {% if 3 == sort_order|int() %}
+                    {% set sel = "selected" %}
+                    {% else %}
+                    {% set sel = "" %}
+                    {% endif %}
+                    <option value="3" {{sel}}>Assigned to, Priority</option>
                 </select>
             </div>
         </div>
