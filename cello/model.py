@@ -38,6 +38,7 @@ class Item(BaseModel):
     itemtype = IntegerField(db_column='itemtype', null=True)
     featureId =  TextField(null=True)
     parentId = IntegerField(db_column='parentId', null=True)
+    priority = IntegerField(db_column='priority', null=True)
     class Meta:
         db_table = 'Item'
 

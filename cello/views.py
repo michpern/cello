@@ -41,7 +41,7 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority):
         self.id = id
         self.type = type
         self.featureId = featureId
@@ -67,6 +67,7 @@ class uiItem:
             self.comments = comments
         self.parentitemtext = parentitemtext
         self.childitemtext = childitemtext
+        self.priority = priority
 
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
@@ -153,13 +154,18 @@ def get_checklist_info(item_id):
 
 def get_UI_stream(stream_id, canEdit, filter_tag):
     stream = model.Stream.get(model.Stream.id == stream_id)
+    if stream.stream_type == 4: #  TODO Fix hard coded 
+        orderby = model.Item.lastupdated.desc()
+    else:
+        orderby = SQL('priority, assignedto desc')
+
     if filter_tag == 'all':
-        stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(model.Item.orderInStream)
+        stream_items = model.Item.select().where(model.Item.parentstream == stream_id).order_by(orderby)
     elif filter_tag == 'mine':
         cu = get_current_user()
-        stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == cu)).order_by(model.Item.orderInStream)
+        stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == cu)).order_by(orderby)
     else:        
-        stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == filter_tag)).order_by(model.Item.orderInStream)
+        stream_items = model.Item.select().where((model.Item.parentstream == stream_id) & (model.Item.assignedto == filter_tag)).order_by(orderby)
 
     si = []
     for i in stream_items:
@@ -178,7 +184,7 @@ def get_UI_stream(stream_id, canEdit, filter_tag):
             child = c.featureId + "/" + c.name
             childitemtext = childitemtext + child + "<br/>"
 
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext)
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 
@@ -492,6 +498,7 @@ def set_item_from_data(item, data):
     item.itemtype = int(data['itemtype'])
     item.parentId = int(data['parent-item'])
     item.assignedto = int(data['assigned-to'])
+    item.priority = int(data['priority'])
     
 
 @app.route('/save_item', methods=['POST'])
@@ -569,7 +576,7 @@ def move_item():
     item = model.Item.get(model.Item.id == item_id)
     parent = model.Stream.get(model.Stream.id == parent_id)
 
-    if item.assignedto is None and parent.stream_type == 3:      # TODO fix 3 == inprogress
+    if (item.assignedto is None or item.assignedto == -1) and parent.stream_type == 3:      # TODO fix 3 == inprogress
         query = model.Item.update(assignedto=ludb).where(model.Item.id == item_id)
         query.execute()
 

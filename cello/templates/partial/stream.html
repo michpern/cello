@@ -21,7 +21,7 @@
 
                 {{ item.featureId }}/{{ item.name }} <br /> 
                 <div class="card-people-container">
-                    <span class="card-last-updated"> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
+                    <span class="card-last-updated"> <span class="priority">[{{ item.priority }}]</span> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
                 </div>
                 <br />
                 {% if item.checklistitemcount > 0 %}
@@ -67,6 +67,7 @@
                 $('#comments').html('');
                 $('#checklist').html('');
                 $('#itemtype').val(1);
+                $('#priority').val(3);
                 $.when(get_possible_parents(-1, {{ stream.id }}), get_team_members({{ stream.id }})).done(function (parents, team) {
                     $('#parent-item')
                          .find('option')
