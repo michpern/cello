@@ -342,6 +342,7 @@
 
                 <a href="#"  class="navbar-brand">{{board_name}}</a>
                 <a href="{{ url_for('auth.logout') }}" class="navbar-brand">Logout</a>
+                {% if sort_order is defined %}
                 {% set asel='' %}
                 {% set msel='' %}
                 {% if filter_tag == 'all' %}
@@ -383,6 +384,7 @@
                     <option value="3" {{sel}}>Assigned to, Priority</option>
                 </select>
                 <input type="search" id="search_term" name="search_term" value="{{search_term}}" /> <span id="board_query" class="glyphicon glyphicon-search search-icon"></span>
+                {% endif %}
             </div>
         </div>
     </div>
