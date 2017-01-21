@@ -24,7 +24,7 @@
 
                 {{ item.featureId }}/{{ item.name }} <br /> 
                 <div class="card-people-container">
-                    <span class="card-last-updated"> <span class="priority">[{{ item.priority }}]-{{item.age}}</span> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
+                    <span class="card-last-updated"> <span class="priority">[{{ item.priority }}]</span> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
                 </div>
                 <br />
                 {% if item.checklistitemcount > 0 %}
