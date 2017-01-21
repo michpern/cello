@@ -152,7 +152,7 @@ def get_checklist_info(item_id):
 
     return total,completed, text
 
-def get_UI_stream(stream_id, canEdit, filter_tag, sort_order):
+def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
     stream = model.Stream.get(model.Stream.id == stream_id)
     if stream.stream_type == 4: #  TODO Fix hard coded 
         orderby = model.Item.lastupdated.desc()
@@ -370,10 +370,11 @@ def slash():
     boardId = user.defaultboard
     return board(boardId)
 
-@app.route('/board/<board_id>')
-@app.route('/board/<board_id>/<filter_tag>')
-@app.route('/board/<board_id>/<filter_tag>/<sortorder>')
-def board(board_id, filter_tag='all', sortorder='1'):
+@app.route('/board/<board_id>', strict_slashes=False)
+@app.route('/board/<board_id>/<filter_tag>', strict_slashes=False)
+@app.route('/board/<board_id>/<filter_tag>/<sortorder>', strict_slashes=False)
+@app.route('/board/<board_id>/<filter_tag>/<sortorder>/<searchterm>', strict_slashes=False)
+def board(board_id, filter_tag='all', sortorder='1', searchterm=''):
     """Renders the board page."""
     streams = model.Stream.select().where(model.Stream.parentboard==board_id).order_by(model.Stream.order_in_board)
     board = model.Board.get(model.Board.id==board_id)
@@ -386,7 +387,7 @@ def board(board_id, filter_tag='all', sortorder='1'):
     sdict = {}
     uiStreams = []
     for stream in streams:
-        uistr = get_UI_stream(stream.id, canEdit, filter_tag, sortorder)
+        uistr = get_UI_stream(stream.id, canEdit, filter_tag, sortorder, searchterm)
         uiStreams.append(uistr)
 
     
@@ -400,6 +401,7 @@ def board(board_id, filter_tag='all', sortorder='1'):
         can_edit = canEdit,
         filter_tag = filter_tag,
         sort_order = sortorder,
+        search_term = searchterm,
         streams=streams,
         team_users = ui_team_users,
         sdict = sdict,
@@ -551,7 +553,8 @@ def save_item():
     stream_id = data['parentStream']
     item_filter = data['item_filter']
     sort_order = data['sort_order']
-    uistr = get_UI_stream(stream_id, True, item_filter, sort_order)
+    search_term = data['search_term']
+    uistr = get_UI_stream(stream_id, True, item_filter, sort_order, search_term)
 
     return render_template(
         'partial/stream.html',
@@ -568,6 +571,7 @@ def move_item():
     parent = request.args.get("new_parent")
     filter_tag = request.args.get("item_filter")
     sort_order = request.args.get("sort_order")
+    search_term = request.args.get("search_term")
     old_parts = old_pos.split("-")
     item_id = old_parts[2]
     parent_id = parent.split("-")[1]
@@ -589,7 +593,7 @@ def move_item():
         query = model.Item.update(assignedto=ludb).where(model.Item.id == item_id)
         query.execute()
 
-    uistr = get_UI_stream(parent_id, True, filter_tag, sort_order)
+    uistr = get_UI_stream(parent_id, True, filter_tag, sort_order, search_term)
     return render_template(
         'partial/stream.html',
         can_edit = True,

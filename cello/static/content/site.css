@@ -136,3 +136,7 @@ li > #items > #stream_button {
   width: 25%;
   color: blueviolet;
 }
+
+.search-icon {
+    color: red;
+}

@@ -25,7 +25,7 @@
         var dialog, form;
         function move_item(old_pos, new_pos, new_parent) {
             $.ajax({
-                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent + "&item_filter={{filter_tag}}&sort_order={{sort_order}}",                   //
+                url: "/move_item?old_pos=" + old_pos + "&new_pos=" + new_pos + "&new_parent=" + new_parent + "&item_filter={{filter_tag}}&sort_order={{sort_order}}&search_term={{search_term}}",                   //
                     timeout: 30000,
                     type: "GET",
 
@@ -276,13 +276,19 @@
 
         $(function () {
             $('#item-select-filter').change(function () {
-                window.location = "/board/{{board_id}}/" + $(this).val() + '/' + $('#item-sort-order').val();
+                window.location = "/board/{{board_id}}/" + $(this).val() + '/' + $('#item-sort-order').val() + '/' + $('#search_term').val();
             });
         });
 
         $(function () {
             $('#item-sort-order').change(function () {
-                window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val();
+                window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val() + '/' + $('#search_term').val();
+            });
+        });
+        
+        $(function () {
+            $('#board_query').click(function () {
+                window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val() + '/' + $('#search_term').val();
             });
         });
     }
@@ -363,6 +369,7 @@
                     {% endif %}
                     <option value="3" {{sel}}>Assigned to, Priority</option>
                 </select>
+                <input type="text" id="search_term" name="search_term" value="{{search_term}}" /> <span id="board_query" class="glyphicon glyphicon-search search-icon"></span>
             </div>
         </div>
     </div>
