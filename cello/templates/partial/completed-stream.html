@@ -1,7 +1,7 @@
 ﻿
 <li class="li-parent" id="stream-{{ stream.id }}">
     {{ stream.name }}
-    <ul class="ui-sortable" id="completeditems">
+    <ul class="ui-sortable" id="items">
         {% set seen_old = 0 %}
         {% for item in stream.items %}
             {% if item.age > 14 and seen_old == 0 %}
