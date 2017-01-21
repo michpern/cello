@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - My Flask Application</title>
+
     <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -291,6 +292,12 @@
                 window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val() + '/' + $('#search_term').val();
             });
         });
+
+        $(function () {
+            $('#search_term').on('search', function () {
+                window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val() + '/' + $('#search_term').val();
+            });
+        });
     }
 
     binder();
@@ -369,7 +376,7 @@
                     {% endif %}
                     <option value="3" {{sel}}>Assigned to, Priority</option>
                 </select>
-                <input type="text" id="search_term" name="search_term" value="{{search_term}}" /> <span id="board_query" class="glyphicon glyphicon-search search-icon"></span>
+                <input type="search" id="search_term" name="search_term" value="{{search_term}}" /> <span id="board_query" class="glyphicon glyphicon-search search-icon"></span>
             </div>
         </div>
     </div>

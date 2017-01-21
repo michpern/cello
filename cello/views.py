@@ -174,9 +174,28 @@ def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
 
     si = []
     for i in stream_items:
+        item_wanted = False
+        if (search_term is None or search_term == ''):
+            item_wanted = True
+        else:
+            if search_term in i.name:
+                item_wanted = True
+            elif search_term in i.description:
+                item_wanted = True
 
         checklisttotal, checklistitemcompleted, checklisttext = get_checklist_info(i.id)
+        if not item_wanted:
+            if search_term in checklisttext:
+                item_wanted = True
+
         comments = get_comment_info(i.id)
+        if not item_wanted:
+            if search_term in comments:
+                item_wanted = True
+
+        if not item_wanted:
+            continue
+
         if i.parentId is None or i.parentId == -1:
             parentItem = ""
         else:
