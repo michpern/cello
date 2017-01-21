@@ -111,16 +111,17 @@ li > #roitems > li {
 }
 
 #completeditems > li {
- 	margin: 10px 0px;
+    margin: 10px 0px;
     background: white;
     border: none;
     padding: 10px 10px;
     border-radius: 4px;
     font-size: 14px;
     font-weight: normal;
-    color: #555;	
+    color: #555;
     box-shadow: 1px 1px 2px lightgrey;
     white-space: normal;
+}
 
 .cancel_drag {
     display: none;
