@@ -32,7 +32,12 @@
 <div class="streams-container">
 <ul class="ul-parent">
 {% for stream in uis %}
-    {% include 'partial/stream.html' %}
+    {% if stream.is_completed_stream %}
+        {% include 'partial/completed-stream.html' %}
+    {% else %}
+        {% include 'partial/stream.html' %}
+    {% endif %}
+
 {% endfor %}
 </ul>
     

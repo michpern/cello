@@ -33,11 +33,12 @@ class uiIdValue:
         self.value = value
 
 class uiStream:
-    def __init__(self, id, name, allow_direct_add, can_edit, items):
+    def __init__(self, id, name, allow_direct_add, can_edit, is_completed_stream, items):
         self.id = id
         self.name = name
         self.allow_direct_add = (allow_direct_add and can_edit)
         self.can_edit = can_edit
+        self.is_completed_stream = is_completed_stream
         self.items = items
 
 class uiItem:
@@ -154,8 +155,10 @@ def get_checklist_info(item_id):
 
 def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
     stream = model.Stream.get(model.Stream.id == stream_id)
+    is_completed_stream = False
     if stream.stream_type == 4: #  TODO Fix hard coded 
         orderby = model.Item.lastupdated.desc()
+        is_completed_stream = True
     else:
         if sort_order == '1':
             orderby = SQL('priority, lastupdated desc')
@@ -214,7 +217,7 @@ def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
     print ("Stream: " + stream.name ) 
 
     print (si)   
-    uistr = uiStream(stream.id, stream.name, stream.allow_direct_add, canEdit, si)
+    uistr = uiStream(stream.id, stream.name, stream.allow_direct_add, canEdit, is_completed_stream, si)
     return uistr
 
 def get_UI_teams(current_user):

@@ -1,0 +1,46 @@
+﻿
+<li class="li-parent" id="stream-{{ stream.id }}">
+    {{ stream.name }}
+    <ul class="ui-sortable" id="completeditems">
+        {% for item in stream.items %}
+            <li id="item-{{ stream.id }}-{{ item.id }}"> 
+                {% if item.type == 3 %}
+                    <span class="glyphicon glyphicon-ok" title="Task"></span>
+                {% endif %}
+                {% if item.type == 2 %}
+                <span class="glyphicon glyphicon-fire" title="Bug"></span>
+                {% endif %}
+                {% if item.type == 4 %}
+                <span class="glyphicon glyphicon-user" title="User Story"></span>
+                {% endif %}
+
+
+                {{ item.featureId }}/{{ item.name }} <br /> 
+                <div class="card-people-container">
+                    <span class="card-last-updated"> <span class="priority">[{{ item.priority }}]</span> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
+                </div>
+                <br />
+                {% if item.checklistitemcount > 0 %}
+                   <span class="glyphicon glyphicon-list" title="{{ item.checklisttext }}"></span> {{ item.checklistitemcompleted }}/{{ item.checklistitemcount }} 
+                {% endif %}
+                {% if item.description != "" %}
+                   <span class="glyphicon glyphicon-align-justify" title="{{ item.description }}"></span>
+                {% endif %}
+                {% if item.comments != "" %}
+                    <span class="glyphicon glyphicon-comment" title="{{ item.comments }}"></span>
+                {% endif %}
+                {% if item.parentitemtext != "" %}
+                    <span class="glyphicon glyphicon-chevron-up" title="Parent: {{ item.parentitemtext }}"></span>
+                {% endif %}
+                {% if item.childitemtext != "" %}
+                    <span class="glyphicon glyphicon-chevron-down" title="Child Items:<br/>{{ item.childitemtext }}"></span>
+                {% endif %}
+
+            </li>
+        {% endfor %}
+        
+        
+        <li class="cancel_drag">
+        </li>
+    </ul>
+</li>
