@@ -298,6 +298,12 @@
                 window.location = "/board/{{board_id}}/" + $('#item-select-filter').val() + '/' + $('#item-sort-order').val() + '/' + $('#search_term').val();
             });
         });
+
+        $(function () {
+            $('#older-items-toggle').click(function () {
+                $('#older-completeditems').toggle();
+            });
+        });
     }
 
     binder();

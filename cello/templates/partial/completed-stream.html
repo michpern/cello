@@ -2,7 +2,14 @@
 <li class="li-parent" id="stream-{{ stream.id }}">
     {{ stream.name }}
     <ul class="ui-sortable" id="completeditems">
+        {% set seen_old = 0 %}
         {% for item in stream.items %}
+            {% if item.age > 14 and seen_old == 0 %}
+                {% set seen_old = 1 %}
+     </ul>
+     <a id="older-items-toggle">Older</a>
+     <ul class="older " id="older-completeditems">
+            {% endif %}
             <li id="item-{{ stream.id }}-{{ item.id }}"> 
                 {% if item.type == 3 %}
                     <span class="glyphicon glyphicon-ok" title="Task"></span>
@@ -17,7 +24,7 @@
 
                 {{ item.featureId }}/{{ item.name }} <br /> 
                 <div class="card-people-container">
-                    <span class="card-last-updated"> <span class="priority">[{{ item.priority }}]</span> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
+                    <span class="card-last-updated"> <span class="priority">[{{ item.priority }}]-{{item.age}}</span> {{ item.lastupdated | formatdatetime }} {{ item.lastupdatedby | getusername }} </span> <span class="card-assigned-to"> {{item.assignedto | getusername }}</span>
                 </div>
                 <br />
                 {% if item.checklistitemcount > 0 %}

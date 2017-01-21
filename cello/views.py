@@ -42,7 +42,7 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority, age):
         self.id = id
         self.type = type
         self.featureId = featureId
@@ -69,6 +69,7 @@ class uiItem:
         self.parentitemtext = parentitemtext
         self.childitemtext = childitemtext
         self.priority = priority
+        self.age = age
 
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
@@ -117,6 +118,22 @@ def get_date_time(dt):
     res = y * 10000000000 + mon * 100000000 + d * 1000000 + h * 10000 + m * 100 + s
     return res
 
+def get_days_difference(t):
+    if t is None:
+        return 999
+
+    y = t // 10000000000
+    mon = (t // 100000000) % 100
+    d = (t // 1000000) % 100
+    h = (t // 10000) % 100
+    m = (t // 100) % 100
+    s = t % 100
+
+    then = datetime(y, mon, d, h, m, s)
+    diff = datetime.utcnow() - then
+    days = diff.days
+    return days
+    
 def get_user_name(u):
     if u is None or u == -1:
         return ""
@@ -211,7 +228,8 @@ def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
             child = c.featureId + "/" + c.name
             childitemtext = childitemtext + child + "<br/>"
 
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority)
+        age = get_days_difference(i.lastupdated)
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority, age)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 

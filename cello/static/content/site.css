@@ -110,7 +110,8 @@ li > #roitems > li {
     white-space: normal;
 }
 
-#completeditems > li {
+#completeditems > li,
+#older-completeditems > li {
     margin: 10px 0px;
     background: white;
     border: none;
@@ -121,6 +122,10 @@ li > #roitems > li {
     color: #555;
     box-shadow: 1px 1px 2px lightgrey;
     white-space: normal;
+}
+
+#older-completeditems {
+    display: none;
 }
 
 .cancel_drag {
