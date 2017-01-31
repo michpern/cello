@@ -1,7 +1,7 @@
 """
 Routes and views for the flask application.
 """
-
+import os
 from datetime import datetime
 import json
 from flask import render_template, request, jsonify
@@ -700,3 +700,18 @@ def get_team_from_stream():
     team = get_ui_team_members(stream.parentboard)
     retval = json.dumps(team, default=jdefault)
     return retval
+
+ALLOWED_EXTENSIONS = ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif']
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            now = datetime.now()
+            filename = os.path.join(app.config['UPLOAD_FOLDER'], "%s.%s" % (now.strftime("%Y-%m-%d-%H-%M-%S-%f"), file.filename.rsplit('.', 1)[1]))
+            file.save(filename)
+            return jsonify({"success":True})
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS

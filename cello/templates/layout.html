@@ -7,8 +7,13 @@
 
     <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
+    <link href="/static/content/jquery.filer.css" type="text/css" rel="stylesheet" />
+    <link href="/static/content/themes/jquery.filer-dragdropbox-theme.css" type="text/css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+<!--   <script type="text/javascript" src="static/scripts/jquery-file-drop.js"></script> -->
+    <script src="/static/scripts/jquery.filer.min.js"></script>
+<!--    <script type="text/javascript" src="static/scripts/upload.js"></script> -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
     <style>
 /*
@@ -229,6 +234,7 @@
                     }
                     $('#assigned-to').val(item.assignedto)
 
+                    $('#dropbox').html('');
                     dialog.dialog("open");
                 });
 
@@ -304,6 +310,15 @@
                 $('#older-completeditems').toggle();
             });
         });
+
+        $(function () {          
+            $('#filer_input').filer({
+                changeInput: '<div class="jFiler-input-dragDrop"><div class="jFiler-input-inner"><div class="jFiler-input-icon"><i class="icon-jfi-folder"></i></div><div class="jFiler-input-text"><h3>Click on this box</h3> <span style="display:inline-block; margin: 15px 0">or</span></div><a class="jFiler-input-choose-btn btn-custom blue-light">Browse Files</a></div></div>',
+                showThumbs: true,
+                theme: "dragdropbox",
+                templates: themes/filer_default_opts.templates
+            });
+        });
     }
 
     binder();
@@ -317,6 +332,8 @@
     });
 
     </script>
+
+
 </head>
 
 <body>

@@ -14,7 +14,7 @@
             <input type="hidden" id="itemid" name="itemid" />
             <input type="hidden" id="item_filter" name="item_filter" value="{{filter_tag}}" />
             <input type="hidden" id="sort_order" name="sort_order" value="{{sort_order}}" />
-            <input type="hidden" id="search-term" name="search_term" value="{{search_term}}"
+            <input type="hidden" id="search-term" name="search_term" value="{{search_term}}" />
             <label>Priority<select id="priority" name="priority"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
             <label>Assigned to<select id="assigned-to" name="assigned-to"></select></label>
             <div>Last updated<span name="lastupdated" id="lastupdated" ></span></div>
@@ -23,6 +23,10 @@
             <label>Add Comment<textarea name="newcomment" id="newcomment" class="text ui-widget-content ui-corner-all"></textarea></label>
             <div id="comments"></div>
             <label>Parent Item<select name="parent-item" id="parent-item"></select></label>
+ 
+            <input type="file" name="files[]" id="filer_input" multiple="multiple">
+            <input type="submit" value="Submit">
+
             <!-- Allow form submission with keyboard without duplicating the dialog button -->
             <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>

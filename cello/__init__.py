@@ -20,6 +20,7 @@ SECRET_KEY = 'ssshhhh'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # instantiate the db wrapper
 db = Database(app)

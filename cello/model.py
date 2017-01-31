@@ -88,6 +88,16 @@ class ChecklistItem(BaseModel):
     class Meta:
         db_table = 'ChecklistItem'
 
+class ItemAttachment(BaseModel):
+    parentitem = IntegerField(db_column='itemId')
+    addedby =  IntegerField(db_column='addedBy')
+    dateadded = IntegerField(db_column='dateAdded', null=True)
+    path = TextField(null=True)
+
+    class Meta:
+        db_table = 'ItemAttachment'
+
+
 class Team(BaseModel):
     name = TextField(null=True)
 
