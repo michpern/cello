@@ -6,7 +6,7 @@
 
 <div id="dialog-form" title="Create New Item">
     <form id="new-item-form">
-        <fieldset>
+        <fieldset id="new-item-fieldset">
             <div><label>Name<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" /></label></div>
             <div><label>Description<textarea name="description" id="description" class="text ui-widget-content ui-corner-all"></textarea></label></div>
             <div><label>Item type<select name="itemtype" id="itemtype"><option value="1">Feature</option><option value="2">Bug</option><option value="3">Task</option><option value="4">User Story</option></select></label></div>
@@ -34,7 +34,10 @@ $("#add-checklist-item").button().on("click", function () {
     var item_text = $("#newchecklistitem").val();
     var d = new Date();
     var t = d.getTime();
-    $('#checklist').append("<div><label><input type='checkbox' name='newclic-" + item_id + "-'" + t + " id='" + item_id + "-' >"  + item_text +  "</label></div>");
+    var cb = "<input type='checkbox' name='newclic-" + item_id + "-" + t + "' id='" + item_id + "-'>";
+    $('#checklist').append("<div><label>" + cb  + item_text +  "</label></div>");
+    $('#checklist').append("<input type='hidden' name='newclih-" + item_id + "-" + t + "' value='" + item_text + "'>");
+/*    $('#new-item-fieldset').append(cb); */
     $('#newchecklistitem').val('');
 });
 </script>

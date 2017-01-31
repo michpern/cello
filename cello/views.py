@@ -587,21 +587,25 @@ def save_item():
         #new_checklistitem.completed = 0
         #new_checklistitem.save()
 
-    new_checklistitems = {k:v for k,v in data.items() if k.startswith('newclic-')}
+    update_checklist_items(item_id, data)
+
+    new_checklistitems = {k:v for k,v in data.items() if k.startswith('newclih-')}
+
     for key in new_checklistitems:
-        print("Kys is %s" % key)
+        cb = key.replace('newclih', 'newclic');
+        if (cb in data):
+            complete = 1;
+        else:
+            complete = 0;
+
         new_checklistitem = model.ChecklistItem()
         new_checklistitem.checklisttext = new_checklistitems[key]
         new_checklistitem.lastupdated = get_date_time(datetime.utcnow())
         new_checklistitem.lastupdatedby = get_current_user()
         new_checklistitem.parentitem = new_item.id
-        new_checklistitem.completed = 0
+        new_checklistitem.completed = complete
         new_checklistitem.save()
         
-    
-
-    update_checklist_items(item_id, data)
-
     stream_id = data['parentStream']
     item_filter = data['item_filter']
     sort_order = data['sort_order']
