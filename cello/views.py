@@ -686,10 +686,10 @@ def get_potential_parents():
     stream_id = request.args.get("sid")
     stream = model.Stream.get(model.Stream.id == stream_id)
     board = model.Board.get(model.Board.id == stream.parentboard)
-    board_stream_ids = model.Stream.select(fn.Distinct(model.Stream.id)).where(model.Stream.parentboard==board.id)
+    board_stream_ids = model.Stream.select(fn.Distinct(model.Stream.id)).where((model.Stream.parentboard==board.id) & (model.Stream.stream_type != model.StreamType.COMPLETED))
     
     parr =  []
-    potentials = model.Item.select().where((model.Item.parentstream << board_stream_ids) & (model.Item.id != item_id)).order_by(model.Item.name)
+    potentials = model.Item.select().where((model.Item.parentstream << board_stream_ids) & (model.Item.id != item_id)).order_by(model.Item.featureId)
     for p in potentials:
         id = p.id
         name = p.featureId + "/" +  p.name
