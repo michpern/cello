@@ -578,15 +578,27 @@ def save_item():
         new_comment.lastupdatedby = get_current_user()
         new_comment.parentitem = new_item.id
         new_comment.save()
+#    if (data['newchecklistitem']):
+        #new_checklistitem = model.ChecklistItem()
+        #new_checklistitem.checklisttext = data['newchecklistitem']
+        #new_checklistitem.lastupdated = get_date_time(datetime.utcnow())
+        #new_checklistitem.lastupdatedby = get_current_user()
+        #new_checklistitem.parentitem = new_item.id
+        #new_checklistitem.completed = 0
+        #new_checklistitem.save()
 
-    if (data['newchecklistitem']):
+    new_checklistitems = {k:v for k,v in data.items() if k.startswith('newclic-')}
+    for key in new_checklistitems:
+        print("Kys is %s" % key)
         new_checklistitem = model.ChecklistItem()
-        new_checklistitem.checklisttext = data['newchecklistitem']
+        new_checklistitem.checklisttext = new_checklistitems[key]
         new_checklistitem.lastupdated = get_date_time(datetime.utcnow())
         new_checklistitem.lastupdatedby = get_current_user()
         new_checklistitem.parentitem = new_item.id
         new_checklistitem.completed = 0
         new_checklistitem.save()
+        
+    
 
     update_checklist_items(item_id, data)
 
@@ -613,7 +625,7 @@ def move_item():
     sort_order = request.args.get("sort_order")
     search_term = request.args.get("search_term")
     old_parts = old_pos.split("-")
-    item_id = old_parts[2]
+   
     parent_id = parent.split("-")[1]
 
     parent = model.Stream.get(model.Stream.id == parent_id)

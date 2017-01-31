@@ -5,7 +5,7 @@
 
 
 <div id="dialog-form" title="Create New Item">
-    <form>
+    <form id="new-item-form">
         <fieldset>
             <div><label>Name<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" /></label></div>
             <div><label>Description<textarea name="description" id="description" class="text ui-widget-content ui-corner-all"></textarea></label></div>
@@ -14,12 +14,12 @@
             <input type="hidden" id="itemid" name="itemid" />
             <input type="hidden" id="item_filter" name="item_filter" value="{{filter_tag}}" />
             <input type="hidden" id="sort_order" name="sort_order" value="{{sort_order}}" />
-            <input type="hidden" id="search-term" name="search_term" value="{{search_term}}"
+            <input type="hidden" id="search-term" name="search_term" value="{{search_term}}" />
             <label>Priority<select id="priority" name="priority"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
             <label>Assigned to<select id="assigned-to" name="assigned-to"></select></label>
             <div>Last updated<span name="lastupdated" id="lastupdated" ></span></div>
             <div id="checklist"></div>
-            <label>Add Checklist Item<input type="text" name="newchecklistitem" id="newchecklistitem" class="text ui-widget-content ui-corner-all"/></label>
+            <div><label>Add Checklist Item<input type="text" name="newchecklistitem" id="newchecklistitem" class="text ui-widget-content ui-corner-all"/></label><button id="add-checklist-item" type="button">Add</button></div> 
             <label>Add Comment<textarea name="newcomment" id="newcomment" class="text ui-widget-content ui-corner-all"></textarea></label>
             <div id="comments"></div>
             <label>Parent Item<select name="parent-item" id="parent-item"></select></label>
@@ -28,7 +28,16 @@
         </fieldset>
     </form>
 </div>
-
+<script>
+$("#add-checklist-item").button().on("click", function () {
+    var item_id = $("#itemid").val();  
+    var item_text = $("#newchecklistitem").val();
+    var d = new Date();
+    var t = d.getTime();
+    $('#checklist').append("<div><label><input type='checkbox' name='newclic-" + item_id + "-'" + t + " id='" + item_id + "-' >"  + item_text +  "</label></div>");
+    $('#newchecklistitem').val('');
+});
+</script>
 <div class="streams-container">
 <ul class="ul-parent">
 {% for stream in uis %}
