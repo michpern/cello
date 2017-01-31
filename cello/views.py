@@ -616,7 +616,14 @@ def move_item():
     item_id = old_parts[2]
     parent_id = parent.split("-")[1]
 
-    uncompleted_checklist_count = dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id and model.ChecklistItem.completed == 0).count()
+    parent = model.Stream.get(model.Stream.id == parent_id)
+
+    uncompleted_checklist_count = dbchecklist = model.ChecklistItem.select().where((model.ChecklistItem.parentitem == item_id) & (model.ChecklistItem.completed == 0)).count()
+
+    if (parent.stream_type == model.StreamType.COMPLETED and uncompleted_checklist_count > 0):
+        raise InvalidUsage('Cannot complete item with uncompleted checklist items', status_code=501)
+
+    print("Parent type is %d" % parent.stream_type)
 
     query = model.Item.update(orderInStream=model.Item.orderInStream+1).where(model.Item.parentstream == parent_id and model.Item.orderInStream >= new_pos )
     query.execute()
@@ -627,9 +634,8 @@ def move_item():
     query.execute()
 
     item = model.Item.get(model.Item.id == item_id)
-    parent = model.Stream.get(model.Stream.id == parent_id)
 
-    if (item.assignedto is None or item.assignedto == -1) and parent.stream_type == 3:      # TODO fix 3 == inprogress
+    if (item.assignedto is None or item.assignedto == -1) and parent.stream_type == model.StreamType.IN_PROGRESS:
         query = model.Item.update(assignedto=ludb).where(model.Item.id == item_id)
         query.execute()
 
@@ -680,10 +686,10 @@ def get_potential_parents():
     stream_id = request.args.get("sid")
     stream = model.Stream.get(model.Stream.id == stream_id)
     board = model.Board.get(model.Board.id == stream.parentboard)
-    board_stream_ids = model.Stream.select(fn.Distinct(model.Stream.id)).where(model.Stream.parentboard==board.id)
+    board_stream_ids = model.Stream.select(fn.Distinct(model.Stream.id)).where((model.Stream.parentboard==board.id) & (model.Stream.stream_type != model.StreamType.COMPLETED))
     
     parr =  []
-    potentials = model.Item.select().where((model.Item.parentstream << board_stream_ids) & (model.Item.id != item_id)).order_by(model.Item.name)
+    potentials = model.Item.select().where((model.Item.parentstream << board_stream_ids) & (model.Item.id != item_id)).order_by(model.Item.featureId)
     for p in potentials:
         id = p.id
         name = p.featureId + "/" +  p.name

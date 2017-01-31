@@ -1,3 +1,4 @@
+from enum import IntEnum
 from peewee import *
 from cello import db
 # database = SqliteDatabase('c:/dev/tracker.db', **{})
@@ -111,3 +112,10 @@ class SqliteSequence(BaseModel):
 
     class Meta:
         db_table = 'sqlite_sequence'
+
+class StreamType(IntEnum):
+    PROPOSED = 1
+    BLOCKED = 2
+    IN_PROGRESS = 3 
+    COMPLETED = 4
+    NOT_DOING = 5 

@@ -37,7 +37,9 @@
 
                     dataType: 'html',
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("An error has occurred making the request: " + errorThrown)
+                        res = $.parseJSON(XMLHttpRequest.responseText)
+                        alert("An error has occurred making the request: " + res.message);
+                        location.reload();
                     },
                     success: function (data) {
                         sid = '#' + new_parent
