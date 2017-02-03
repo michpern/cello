@@ -159,6 +159,10 @@ li > #items > #stream_button {
     color: red;
 }
 
+.overdue {
+    color: red;
+}
+
 input[type="search"] {
  -webkit-box-sizing: content-box;
  -moz-box-sizing: content-box;

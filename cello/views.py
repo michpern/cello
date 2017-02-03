@@ -42,7 +42,7 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority, age):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority, age, duedate):
         self.id = id
         self.type = type
         self.featureId = featureId
@@ -70,6 +70,12 @@ class uiItem:
         self.childitemtext = childitemtext
         self.priority = priority
         self.age = age
+        if duedate is None:
+            self.duedate = ""
+            self.ispastdue = False;
+        else:
+            self.duedate = duedate
+            self.ispastdue = is_in_the_past(duedate)
 
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
@@ -107,6 +113,18 @@ def format_date_time(t):
     r = '{:02d}/{:02d}/{:04d}-{:02d}:{:02d}'.format(d, mon, y, h, m)
     return r
 
+def format_date(t):
+    # yyyymmddhhmmss
+    if t is None:
+        return ""
+
+    y = t // 10000000000
+    mon = (t // 100000000) % 100
+    d = (t // 1000000) % 100
+
+    r = '{:02d}/{:02d}/{:04d}'.format(d, mon, y)
+    return r
+
 def get_date_time(dt):
     y = dt.year
     mon = dt.month
@@ -117,6 +135,17 @@ def get_date_time(dt):
 
     res = y * 10000000000 + mon * 100000000 + d * 1000000 + h * 10000 + m * 100 + s
     return res
+
+def get_date_time_from_input(idt):
+    parts = idt.split("/")
+    d = int(parts[0])
+    mon = int(parts[1])
+    y = int(parts[2])
+    h = 0
+    m = 0
+    s = 0
+    dt = datetime(y, mon, d, h, m, s)
+    return get_date_time(dt)
 
 def get_days_difference(t):
     if t is None:
@@ -134,6 +163,21 @@ def get_days_difference(t):
     days = diff.days
     return days
     
+def is_in_the_past(t):
+    if t is None:
+        return False
+
+    y = t // 10000000000
+    mon = (t // 100000000) % 100
+    d = (t // 1000000) % 100
+    h = (t // 10000) % 100
+    m = (t // 100) % 100
+    s = t % 100
+
+    then = datetime(y, mon, d, h, m, s)
+    r = datetime.utcnow() > then
+    return r
+
 def get_user_name(u):
     if u is None or u == -1:
         return ""
@@ -229,7 +273,7 @@ def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
             childitemtext = childitemtext + child + "<br/>"
 
         age = get_days_difference(i.lastupdated)
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority, age)
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority, age, i.duedate)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 
@@ -337,6 +381,7 @@ def create_standard_streams(board_id):
 
 
 app.jinja_env.filters['formatdatetime'] = format_date_time
+app.jinja_env.filters['formatdate'] = format_date
 app.jinja_env.filters['getusername'] = get_user_name
 
 """    
@@ -549,6 +594,7 @@ def set_item_from_data(item, data):
     item.parentId = int(data['parent-item'])
     item.assignedto = int(data['assigned-to'])
     item.priority = int(data['priority'])
+    item.duedate = get_date_time_from_input(data['due_date'])
     
 
 @app.route('/save_item', methods=['POST'])
@@ -629,7 +675,7 @@ def move_item():
     sort_order = request.args.get("sort_order")
     search_term = request.args.get("search_term")
     old_parts = old_pos.split("-")
-   
+    item_id = old_parts[2]
     parent_id = parent.split("-")[1]
 
     parent = model.Stream.get(model.Stream.id == parent_id)
@@ -692,6 +738,7 @@ def get_item():
 
     d['comments'] = comments
     d['checklist'] = checklist
+    d['duedate'] = format_date(d['duedate'])
     retval = json.dumps(d, default=jdefault)
    
     return retval

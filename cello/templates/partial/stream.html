@@ -39,6 +39,14 @@
                 {% if item.childitemtext != "" %}
                     <span class="glyphicon glyphicon-chevron-down" title="Child Items:<br/>{{ item.childitemtext }}"></span>
                 {% endif %}
+                {% if item.duedate != "" %}
+                {% set inpast="" %}
+                {% if item.ispastdue %}
+                    {% set inpast="overdue" %}
+                {% endif %}
+                <span class="glyphicon glyphicon-calendar {{inpast}}" title="DueDate: {{ item.duedate | formatdate }}"></span>
+                {% endif %}
+
 
             </li>
         {% endfor %}
@@ -68,6 +76,7 @@
                 $('#checklist').html('');
                 $('#itemtype').val(1);
                 $('#priority').val(3);
+                $('#duedate').val('')
                 $.when(get_possible_parents(-1, {{ stream.id }}), get_team_members({{ stream.id }})).done(function (parents, team) {
                     $('#parent-item')
                          .find('option')

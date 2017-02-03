@@ -7,9 +7,9 @@
 
     <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" />
     <style>
 /*
         label, input {
@@ -186,6 +186,7 @@
                     $('#checklist').html('');
                     $('#itemtype').val(item.itemtype);
                     $('#priority').val(item.priority);
+                    $('#duedate').val(item.duedate);
                     comments = item.comments;
                     num_comments = comments.length;
                     if (num_comments > 0) {
@@ -305,6 +306,10 @@
             $('#older-items-toggle').click(function () {
                 $('#older-completeditems').toggle();
             });
+        });
+
+        $(function () {
+            $("#duedate").datepicker({ dateFormat: 'dd/mm/yy' });
         });
     }
 
