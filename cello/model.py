@@ -43,6 +43,13 @@ class Item(BaseModel):
     class Meta:
         db_table = 'Item'
 
+class ItemRelationship(BaseModel):
+    leftItem = ForeignKeyField(Item, db_column='leftItem')
+    rightItem = IntegerField(db_column='rightItem', null=True)
+    relationshipType = IntegerField(db_column='relationshipType', null=True)
+    class Meta:
+        db_table = 'ItemRelationship'
+
 """ - Not used
 class Project(BaseModel):
     gitstem = TextField(null=True)
@@ -109,3 +116,6 @@ class StreamType(IntEnum):
     IN_PROGRESS = 3 
     COMPLETED = 4
     NOT_DOING = 5 
+
+class RelationshipType(IntEnum):
+    BLOCKS = 1

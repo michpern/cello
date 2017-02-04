@@ -184,6 +184,7 @@
                     $('#lastupdated').html(item.lastupdated);
                     $('#comments').html('');
                     $('#checklist').html('');
+                    $('#blocks').html('');
                     $('#itemtype').val(item.itemtype);
                     $('#priority').val(item.priority);
                     $('#duedate').val(item.duedate);
@@ -218,6 +219,15 @@
                         $('#parent-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
                     }
                     $('#parent-item').val(item.parentId)
+
+                    blocks = item.blocks;
+                    num_blocks = blocks.length;
+                    if (num_blocks > 0) {
+                        $('#blocks').append("<b>Blocks</b><br>")
+                    }
+                    for (var i = 0; i < num_blocks; i++) {
+                        $('#blocks').append("<div class='blocks'>" + blocks[i].value + "</div>");
+                    }
 
                     $('#assigned-to')
                         .find('option')

@@ -42,7 +42,7 @@ class uiStream:
         self.items = items
 
 class uiItem:
-    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority, age, duedate):
+    def __init__(self, id, type, featureId, name, lastupdated, lastupdatedby, assignedto, checklistitemcount, checklistitemcompleted, checklisttext, description, comments, parentitemtext, childitemtext, priority, age, duedate, blocks):
         self.id = id
         self.type = type
         self.featureId = featureId
@@ -76,6 +76,10 @@ class uiItem:
         else:
             self.duedate = duedate
             self.ispastdue = is_in_the_past(duedate)
+        if blocks is None:
+            self.blocks = ""
+        else:
+            self.blocks = blocks
 
 class uiComment:
     def __init__(self, id, comment, lastupdated, lastupdatedby):
@@ -273,7 +277,16 @@ def get_UI_stream(stream_id, canEdit, filter_tag, sort_order, search_term):
             childitemtext = childitemtext + child + "<br/>"
 
         age = get_days_difference(i.lastupdated)
-        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority, age, i.duedate)
+
+        blockstext = ""
+        dbblocks = model.ItemRelationship.select().where((model.ItemRelationship.leftItem == i.id) & (model.ItemRelationship.relationshipType == model.RelationshipType.BLOCKS))  
+        for b in dbblocks:
+            blockee_id = b.rightItem
+            blockee = model.Item.get(model.Item.id == blockee_id)
+            blockee_ui =  blockee.featureId + "/" + blockee.name
+            blockstext = blockstext + blockee_ui + "<br/>"           
+
+        uii = uiItem(i.id, i.itemtype, i.featureId, i.name, i.lastupdated, i.lastupdatedby, i.assignedto, checklisttotal, checklistitemcompleted, checklisttext, i.description, comments, parentItem, childitemtext, i.priority, age, i.duedate, blockstext)
         si.append(uii)
 
     print ("Stream: " + stream.name ) 
@@ -714,7 +727,10 @@ def get_item():
     item_id = request.args.get("id")
     item = model.Item.get(model.Item.id == item_id)
     dbcomments = model.Comment.select().where(model.Comment.parentitem == item_id).order_by(model.Comment.lastupdated.desc())
-    dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id).order_by(model.ChecklistItem.lastupdated.desc())
+    dbchecklist = model.ChecklistItem.select().where(model.ChecklistItem.parentitem == item_id).order_by(model.ChecklistItem.lastupdated.desc())        
+    # peewee does joins in a slight odd way and has an issue with a join to the same table more than once
+    dbblocks = model.ItemRelationship.select().where((model.ItemRelationship.leftItem == item_id) & (model.ItemRelationship.relationshipType == model.RelationshipType.BLOCKS))  
+
     comments = []
     for i in dbcomments:
         lu = format_date_time(i.lastupdated)
@@ -728,6 +744,13 @@ def get_item():
         lub = get_user_name(i.lastupdatedby)
         checklist.append(uiChecklistItem(i.id, i.checklisttext, lu, lub, i.completed))
 
+    blocks = []
+    for b in dbblocks:
+        blockee_id = b.rightItem
+        blockee = model.Item.get(model.Item.id == blockee_id)
+        blockee_ui = uiIdValue(blockee.id, blockee.featureId + "/" + blockee.name)
+        blocks.append(blockee_ui)
+
     d = model_to_dict(item)
     if item.parentId is None:
         d['parentId'] = -1
@@ -738,6 +761,7 @@ def get_item():
 
     d['comments'] = comments
     d['checklist'] = checklist
+    d['blocks'] = blocks
     d['duedate'] = format_date(d['duedate'])
     retval = json.dumps(d, default=jdefault)
    
