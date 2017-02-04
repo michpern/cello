@@ -185,6 +185,7 @@
                     $('#comments').html('');
                     $('#checklist').html('');
                     $('#blocks').html('');
+                    $('#blockedby').html('');
                     $('#itemtype').val(item.itemtype);
                     $('#priority').val(item.priority);
                     $('#duedate').val(item.duedate);
@@ -228,6 +229,37 @@
                     for (var i = 0; i < num_blocks; i++) {
                         $('#blocks').append("<div class='blocks'>" + blocks[i].value + "</div>");
                     }
+
+                    $('#blocks-item')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">None</option>')
+                    for (var i = 0; i < possible_parents.length; i++) {
+                        var val = possible_parents[i];
+                        $('#blocks-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#blocks-item').val(-1)
+
+                    blockedby = item.blockedby;
+                    num_blockers = blockedby.length;
+                    if (num_blockers > 0) {
+                        $('#blockedby').append("<b>Blocked By</b><br>")
+                    }
+                    for (var i = 0; i < num_blocks; i++) {
+                        $('#blockedby').append("<div class='blocks'>" + blockedby[i].value + "</div>");
+                    }
+
+                    $('#blockedby-item')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">None</option>')
+                    for (var i = 0; i < possible_parents.length; i++) {
+                        var val = possible_parents[i];
+                        $('#blockedby-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#blockedby-item').val(-1)
 
                     $('#assigned-to')
                         .find('option')

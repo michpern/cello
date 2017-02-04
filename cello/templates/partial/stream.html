@@ -49,6 +49,9 @@
                 {% if item.blocks != "" %}
                     <span class="glyphicon glyphicon-step-backward" title="Blocks: {{ item.blocks }}"></span>
                 {% endif %}
+                {% if item.blockedby != "" %}
+                    <span class="glyphicon glyphicon-step-forward" title="Blocked By: {{ item.blockedby }}"></span>
+                {% endif %}
             </li>
         {% endfor %}
         
@@ -91,6 +94,29 @@
                         $('#parent-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
                     }
                     $('#parent-item').val(-1)
+
+                    $('#blocks-item')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">None</option>')
+                    for (var i = 0; i < possible_parents.length; i++) {
+                        var val = possible_parents[i];
+                        $('#blocks-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#blocks-item').val(-1)
+
+                    $('#blockedby-item')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="-1">None</option>')
+                    for (var i = 0; i < possible_parents.length; i++) {
+                        var val = possible_parents[i];
+                        $('#blockedby-item').append("<option value='" + val.id + "'>" + val.value + "</option>")
+                    }
+                    $('#blockedby-item').val(-1)
+
 
                     $('#assigned-to')
                         .find('option')
